@@ -13,6 +13,7 @@ def main():
 	x_pts = np.arange(-1.5, 1.55, 0.05)
 	y_pts = x_pts
 
+	# TODO: see np.meshgrid
 	z_pts = np.kron(x_pts, np.ones((len(y_pts), 1))) + 1j * np.kron(np.ones((1, len(x_pts))), y_pts.reshape(-1, 1))
 
 	z_pts = z_pts.flatten()
