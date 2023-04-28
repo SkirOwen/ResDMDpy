@@ -14,7 +14,10 @@ def main():
 	y_pts = x_pts
 
 	# TODO: see np.meshgrid
-	z_pts = np.kron(x_pts, np.ones((len(y_pts), 1))) + 1j * np.kron(np.ones((1, len(x_pts))), y_pts.reshape(-1, 1))
+	X, Y = np.meshgrid(x_pts, y_pts)
+	z_pts = X + 1j * Y
+		
+	# z_pts = np.kron(x_pts, np.ones((len(y_pts), 1))) + 1j * np.kron(np.ones((1, len(x_pts))), y_pts.reshape(-1, 1))
 
 	z_pts = z_pts.flatten()
 
