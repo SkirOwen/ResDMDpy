@@ -1,2 +1,6 @@
-numpy
+ipython
 matplotlib
+numpy
+rich
+scipy
+tqdm
