@@ -69,7 +69,7 @@ def koop_pseudo_spec(G, A, L, z_pts, parallel=False, z_pts2=None, reg_param=1e-1
 					RES[idx] = res
 
 		else:
-			for jj in tqdm(range(LL)):
+			for jj in tqdm(range(LL), desc="Koopman pseudospectra"):
 
 				# "smallestabs in matlab is SM in scipy and sm in Octave and Matlab<R2017a
 				RES[jj] = np.sqrt(
