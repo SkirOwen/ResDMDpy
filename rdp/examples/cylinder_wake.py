@@ -6,7 +6,11 @@ import matplotlib.pyplot as plt
 
 from typing import Literal
 
+from tqdm import tqdm
+
+from rdp import logger
 from rdp.koopman import koop_pseudo_spec
+from rdp.utils.mat_loader import loadmat
 
 plt.rcParams['text.usetex'] = True
 
@@ -68,6 +72,7 @@ def get_dict(dmd: Literal["linear", "combined", "pre-computed", "non-linear"]):
 		L_matrix = data["L_matrix"]
 		N = data["N"][0, 0]
 		PSI_x = data["PSI_x"]
+
 	elif dmd == "combined":
 		data_dmd = scipy.io.loadmat("G:\\PycharmProjects\\ai4er\\resdmd\\ResDMDpy\\rdp\\examples\\Cylinder_DMD.mat")
 		PSI_x0 = data_dmd["PSI_x"]
@@ -80,6 +85,7 @@ def get_dict(dmd: Literal["linear", "combined", "pre-computed", "non-linear"]):
 		G_matrix = (PSI_x.conj().T @ PSI_x) / data_edmd["M2"]
 		A_matrix = (PSI_x.conj().T @ PSI_y) / data_edmd["M2"]
 		L_matrix = (PSI_y.conj().T @ PSI_y) / data_edmd["M2"]
+
 	elif dmd == "non-linear":
 		data_edmd = scipy.io.loadmat("G:\\PycharmProjects\\ai4er\\resdmd\\ResDMDpy\\rdp\\examples\\Cylinder_EDMD.mat")
 		N = data_edmd["N"][0, 0]
@@ -102,7 +108,7 @@ def get_dict(dmd: Literal["linear", "combined", "pre-computed", "non-linear"]):
 
 
 def main():
-	G_matrix, A_matrix, L_matrix, N, PSI_x = get_dict(dmd="non-linear")
+	G_matrix, A_matrix, L_matrix, N, PSI_x= get_dict(dmd="non-linear")
 
 	x_pts = np.arange(-1.5, 1.55, 0.05)
 	y_pts = np.arange(-1.5, 1.55, 0.05)
@@ -138,7 +144,11 @@ def main():
 	t1 = 0.967585567481353 + 0.252543401421919j  # TODO: where does this come form?
 	t1 = lam[abs(lam - t1) == min(abs(lam - t1))]  # TODO: re centering so min(abs(lam-t1)) = 0
 	# TODO: what append if the equality has more than one output, t1 becomes longer than 1
-	# TODO: see np.argmin
+	# TODO: see np.argmin => this gives a number with more precison
+	# >>> lam[abs(lam - t1) == min(abs(lam - t1))]
+	# array([0.96758562+0.25254341j])
+	# >>> lam[np.argmin(abs(lam - t1))]
+	# (0.9675856210485554+0.2525434147325198j)   # type is numpy.complex128
 
 	lam1 = np.zeros(100)
 	ang1 = np.zeros(100)
@@ -166,6 +176,103 @@ def main():
 	ang1[0], lam1[0], res1[0] = 0, 0, 0
 
 	plot_error(lam1, ang1, res1)
+
+
+	# for ind2 it is the same as the one to perform the computation on the data file
+	# TODO make this either read from file or be defined before since I'll be using the raw data
+	m1 = 500
+	m2 = 1000
+	ind1 = np.arange(0, m1) + 6000    # slicing in matlab include the last item
+	ind2 = np.arange(0, m2) + (m1 + 6000) + 500
+
+	logger.info("Loading raw data ..")
+	raw_file = loadmat("G:\\PycharmProjects\\ai4er\\resdmd\\ResDMDpy\\rdp\\examples\\Cylinder_data.mat")
+	logger.info("Done!")
+	raw_data = raw_file["DATA"]
+	obst_r = raw_file["obst_r"]
+	obst_x = raw_file["obst_x"]
+	obst_y = raw_file["obst_y"]
+	x = raw_file["x"]
+	y = raw_file["y"]
+
+	# the issue here is, I create an array which going to become 2D later, i.e change of type
+	# and numpy as not happy.
+	# I can either preset the size of the array or use a list
+	# TODO: also maybe preparing the array to the correct size of the power we are going for
+	# TODO: as it unnecessary to create more never used dimenesion.
+	# TODO: using enumerate would be a solution.
+
+	contour_1 = np.zeros((21, 21))    # this works
+	contour_2 = [0] * 20    # This works
+	for power in tqdm([1, 2, 20]):
+		lambda_ = t1 ** power
+		idd = np.argmin(np.abs(D - lambda_))    # TODO: check this, seem good but return Number, and np.where an array
+		# TODO: matlab returns a Number
+		tt = np.linalg.norm(PSI_x @ V[:, idd]) / np.sqrt(m2)
+		xi = np.linalg.pinv(V) @ np.linalg.pinv(PSI_x) @ raw_data[:(raw_data.shape[0] // 2), ind2].T
+		xi = xi[idd, :]
+		xi = -1j * xi.reshape(400, 100) * tt
+
+		h = plt.figure()
+		subplot_1 = plt.subplot(2, 1, 1)
+		d = 2 * obst_r
+		contour_1[power] = np.linspace(np.min(np.real(xi)), np.max(np.real(xi)), 21)
+		subplot_1.contourf(
+			(x - obst_x) / d,
+			(y - obst_y) / d,
+			np.real(xi),
+			contour_1[power],
+			edgecolor='none'
+		)
+		subplot_1.colorbar()    # TODO: fix this
+		subplot_1.axis('equal')
+		plt.tight_layout()      # TODO: check
+		subplot_1.fill(
+			obst_r * np.cos(np.arange(0, 2 * np.pi, 0.01)) / d,
+			obst_r * np.sin(np.arange(0, 2 * np.pi, 0.01)) / d,
+			"r"
+			# [200, 200, 200] / 255, edgecolor='none'
+		)
+		plt.xlim([-2, np.max((x - obst_x) / d)])        # TODO: check
+		T = f"Mode {power} (real part)"
+		plt.title(T, fontsize=16)       # TODO: check
+		plt.box(True)
+		subplot_1.data_aspect_ratio = [1, 1, 1]
+		subplot_1.plot_box_aspect_ratio = [8.25, 2.25, 1]
+		# subplot_1.clim([np.min(contour_1[power]), np.max(contour_1[power])])   # TODO: fix
+
+
+		subplot2 = plt.subplot(2, 1, 2)
+		d = 2 * obst_r
+		contour_2[power] = np.linspace(0, np.max(np.abs(xi)), 21)
+		subplot2.contourf(
+			(x - obst_x) / d,
+			(y - obst_y) / d,
+			np.abs(xi),
+			contour_2[power],
+			edgecolor='none'
+		)
+		subplot2.colorbar()
+		subplot2.axis('equal')
+		subplot2.tight_layout()
+		subplot2.fill(
+			obst_r * np.cos(np.arange(0, 2 * np.pi, 0.01)) / d,
+			obst_r * np.sin(np.arange(0, 2 * np.pi, 0.01)) / d,
+			"r"
+			# [200, 200, 200] / 255, edgecolor='none'
+		)
+		subplot2.xlim([-2, np.max((x - obst_x) / d)])
+		T = f"Mode {power} (absolute value)"
+		subplot2.title(T, fontsize=16)
+		subplot2.box(True)
+		subplot2.data_aspect_ratio = [1, 1, 1]
+		subplot2.plot_box_aspect_ratio = [8.25, 2.25, 1]
+		subplot2.clim([np.min(contour_2[power]), np.max(contour_2[power])])
+		h.set_position([360.0000, 262.3333, 560.0000, 355.6667])
+
+	plt.show()
+
+
 
 
 if __name__ == "__main__":
