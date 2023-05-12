@@ -6,8 +6,8 @@ from rdp import kernel_resdmd
 
 def gen_from_file(
 	filepath: str,
-	n: int = 200, 
-	m1: int = 500, 
+	n: int = 200,
+	m1: int = 500,
 	m2: int = 1000,
 	use_dmd: int = 1  # TODO: change this to a bool maybe
 ) -> tuple[np.ndarray, np.ndarray]:
@@ -25,7 +25,7 @@ def gen_from_file(
 			data[:, ind2],
 			data[:, ind2 + 1],
 			n=n,
-			cut_off=True,		
+			cut_off=False,
 		)
 	else:
 		_, s, vh = np.linalg.svd(data[:, ind1].T / np.sqrt(m1), full_matrices=False)
