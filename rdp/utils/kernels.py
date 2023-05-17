@@ -1,13 +1,25 @@
+from __future__ import annotations
+
 import numpy as np
 from tqdm import tqdm
 
 
-def kernel_resdmd(xa, ya, xb, yb, n, cut_off, y2=None, sketch=False) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def kernel_resdmd(
+		xa: np.ndarray,
+		ya: np.ndarray,
+		xb: np.ndarray,
+		yb: np.ndarray,
+		n: int,
+		cut_off,
+		y2=None,
+		sketch: bool = False
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 	""""""
 	cut_off = 1e-12 if cut_off else 0
 
 	m1 = xa.shape[1]
 	m2 = xb.shape[1]
+	# TODO: why mean(xa.H).H ?
 	d = np.mean(np.vecnorm(xa - np.mean(xa.conj().T).conj().T))
 
 	s: int = np.max(np.ceil(5 * np.sqrt(m1 + m2) * np.log(m1 + m2)), 5000)
@@ -15,7 +27,6 @@ def kernel_resdmd(xa, ya, xb, yb, n, cut_off, y2=None, sketch=False) -> tuple[np
 
 	if sketch:
 		# TODO: check if it is log10, log2, or logn
-		# TODO: I'm pretty sure this shouldn't be a lamdba
 
 		z = np.sqrt(2 / d**2) * np.random.randn([xa.shape[0], s])
 		th = 2 * np.pi * np.random.randn(s, 1)
@@ -26,7 +37,7 @@ def kernel_resdmd(xa, ya, xb, yb, n, cut_off, y2=None, sketch=False) -> tuple[np
 		g1 = psi_xa.conj().T * psi_xa
 		a1 = psi_ya.conj().T * psi_xa
 		g1 = np.max(g1, np.zeros(*g1.shape))
-		# this should be equivalent to
+		# TODO: this should be equivalent to
 		g1[g1 < 0] = 0
 		# ditto
 		a1[a1 < 0] = 0
