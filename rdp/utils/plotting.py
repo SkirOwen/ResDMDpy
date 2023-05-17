@@ -17,6 +17,7 @@ def plot_pseudospectra(D, RES, X, Y, x_pts, y_pts):
 		Y,
 		np.log10(np.real(RES)).reshape(len(y_pts), len(x_pts)),     # RES is already a real no?
 		np.log10(v)
+		# cmocean.cm.therm
 	)
 	fig.colorbar(contourf)
 	# cbh.set_ticks(np.log10([0.005, 0.01, 0.1, 1]))
@@ -37,13 +38,14 @@ def plot_eig_res(D, RES2):
 	fig, ax = plt.subplots()
 	ax.semilogy(np.angle(D), RES2, ".r", markersize=5)
 	ax.set_xlabel('Real axis')
-	ax.set_ylabel('Angle')  # TODO: check this
+	ax.set_ylabel(r"Angle")  # TODO: check this
 	ax.set_title('Title')
 	plt.show()
 
 
 def plot_error(lam1, ang1, res1):
 	fig, ax = plt.subplots()
+	# TODO: look to change to a scatter log
 	ax.semilogy(lam1, "*-")
 	ax.semilogy(res1, "d-")
 	ax.semilogy(np.real(ang1), "s-")
