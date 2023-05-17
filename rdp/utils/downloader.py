@@ -122,15 +122,15 @@ def url_download(url: str, path: str, task: int = 1, total: int = 1) -> None:
 	logger.debug(f"Downloaded in {path}")
 
 
-def downloader(urls: Iterable[str], target_dir: str = get_download_dir()):
+def downloader(urls: Iterable[str], root: str = get_download_dir()):
 	"""
 	Downloader to download multiple files.
 	"""
 	with ThreadPoolExecutor(max_workers=4) as pool:
-		target_dir = os.path.abspath(target_dir)
+		root = os.path.abspath(root)
 		for task, url in enumerate(urls, start=1):
 			filename = url.split("/")[-1]
-			target_path = os.path.join(target_dir, filename)
+			target_path = os.path.join(root, filename)
 			pool.submit(url_download, url, target_path, task, total=len(urls))
 
 
