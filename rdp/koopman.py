@@ -6,6 +6,8 @@ from functools import partial
 import multiprocessing
 
 
+from rdp.utils.linalg_op import guarantee_hermitian
+
 # KoopPseudoSpec
 
 
@@ -41,7 +43,10 @@ def koop_pseudo_spec(G, A, L, z_pts, parallel=False, z_pts2=None, reg_param=1e-1
 	# parse(p, varargin{:})
 
 	# %%compute the pseudospectrum
-	# G = (G + G')/2; L=(L+L') / 2; %safeguards
+	# safeguards
+	G = guarantee_hermitian(G)
+	L = guarantee_hermitian(L)
+
 	G = (G + G.conj().T) / 2
 	L = (L + L.conj().T) / 2
 	# [VG, DG] = eig(G + norm(G) * (p.Results.reg_param) * eye(size(G)));
