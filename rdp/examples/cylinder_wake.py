@@ -11,69 +11,14 @@ from tqdm import tqdm
 from rdp import logger
 from rdp.koopman import koop_pseudo_spec
 from rdp.utils.mat_loader import loadmat
+from rdp.utils.plotting import plot_pseudospectra, plot_eig_res, plot_error
 
 plt.rcParams['text.usetex'] = True
 
 
-def plot_pseudospectra(D, RES, X, Y, x_pts, y_pts):
-	# TODO: fix the following plot code
-	# Define v
-	v = np.power(10, np.arange(-2, 0.21, 0.2))
-
-	# Create figure and plot
-	fig, ax = plt.subplots()
-	contourf = ax.contourf(
-		X,
-		Y,
-		np.log10(np.real(RES)).reshape(len(y_pts), len(x_pts)),     # RES is already a real no?
-		np.log10(v)
-	)
-	fig.colorbar(contourf)
-	# cbh.set_ticks(np.log10([0.005, 0.01, 0.1, 1]))
-	# cbh.ax.set_yticklabels([0, 0.01, 0.1, 1])
-	# plt.clim(np.log10(0.01), np.log10(1))
-	ax.set_ylim(y_pts[0], y_pts[-1])
-	ax.set_xlim(x_pts[0], x_pts[-1])
-	ax.plot(np.real(D), np.imag(D), '.r')
-	ax.set_xlabel('Real axis')
-	ax.set_ylabel('Imaginary axis')
-	ax.set_title('Title')
-	fig.tight_layout()
-	# TODO: I would like less padding on the right
-	plt.show()
-
-
-def plot_eig_res(D, RES2):
-	fig, ax = plt.subplots()
-	ax.semilogy(np.angle(D), RES2, ".r", markersize=5)
-	ax.set_xlabel('Real axis')
-	ax.set_ylabel('Angle')  # TODO: check this
-	ax.set_title('Title')
-	plt.show()
-
-
-def plot_error(lam1, ang1, res1):
-	fig, ax = plt.subplots()
-	ax.semilogy(lam1, "*-")
-	ax.semilogy(res1, "d-")
-	ax.semilogy(np.real(ang1), "s-")
-	plt.legend(
-		[
-			r'$|\lambda_{j}-\lambda_{1}^{j}|$',
-			r'$\mathrm{res}(\lambda_{j}, g_{j})$',
-			r'eigenspace error'
-		],
-		fontsize=22
-	)
-	plt.ylim([10 ** (-14), 1])
-	# plt.yticks(10 ** (np.arange(14, 2, 2))) TODO: fix this
-	plt.xlim([0, 100])
-	plt.show()
-
-
 def get_dict(dmd: Literal["linear", "combined", "pre-computed", "non-linear"]):
 	if dmd == "linear":
-		data = scipy.io.loadmat("G:\\PycharmProjects\\ai4er\\resdmd\\ResDMDpy\\rdp\\examples\\Cylinder_DMD.mat")
+		data = scipy.io.loadmat("D:\\PythonProjects\\ai4er\\ResDMDpy\\rdp\\examples\\Cylinder_DMD.mat")
 		G_matrix = data["G_matrix"]
 		A_matrix = data["A_matrix"]
 		L_matrix = data["L_matrix"]
@@ -81,10 +26,10 @@ def get_dict(dmd: Literal["linear", "combined", "pre-computed", "non-linear"]):
 		PSI_x = data["PSI_x"]
 
 	elif dmd == "combined":
-		data_dmd = scipy.io.loadmat("G:\\PycharmProjects\\ai4er\\resdmd\\ResDMDpy\\rdp\\examples\\Cylinder_DMD.mat")
+		data_dmd = scipy.io.loadmat("D:\\PythonProjects\\ai4er\\ResDMDpy\\rdp\\examples\\Cylinder_DMD.mat")
 		PSI_x0 = data_dmd["PSI_x"]
 		PSI_y0 = data_dmd["PSI_y"]
-		data_edmd = scipy.io.loadmat("G:\\PycharmProjects\\ai4er\\resdmd\\ResDMDpy\\rdp\\examples\\Cylinder_EDMD.mat")
+		data_edmd = scipy.io.loadmat("D:\\PythonProjects\\ai4er\\ResDMDpy\\rdp\\examples\\Cylinder_EDMD.mat")
 		N = 2 * data_edmd["N"][0, 0]
 		PSI_x = np.hstack([data_edmd["PSI_x"], PSI_x0])
 		PSI_y = np.hstack([data_edmd["PSI_y"], PSI_y0])
@@ -94,7 +39,7 @@ def get_dict(dmd: Literal["linear", "combined", "pre-computed", "non-linear"]):
 		L_matrix = (PSI_y.conj().T @ PSI_y) / data_edmd["M2"]
 
 	elif dmd == "non-linear":
-		data_edmd = scipy.io.loadmat("G:\\PycharmProjects\\ai4er\\resdmd\\ResDMDpy\\rdp\\examples\\Cylinder_EDMD.mat")
+		data_edmd = scipy.io.loadmat("D:\\PythonProjects\\ai4er\\ResDMDpy\\rdp\\examples\\Cylinder_EDMD.mat")
 		N = data_edmd["N"][0, 0]
 		PSI_x = data_edmd["PSI_x"]
 		PSI_y = data_edmd["PSI_y"]
@@ -104,7 +49,7 @@ def get_dict(dmd: Literal["linear", "combined", "pre-computed", "non-linear"]):
 		L_matrix = (PSI_y.conj().T @ PSI_y) / data_edmd["M2"]
 
 	else:   # pre-computed
-		data = scipy.io.loadmat("G:\\PycharmProjects\\ai4er\\resdmd\\ResDMDpy\\rdp\\examples\\Cylinder_EDMD.mat")
+		data = scipy.io.loadmat("D:\\PythonProjects\\ai4er\\ResDMDpy\\rdp\\examples\\Cylinder_EDMD.mat")
 		G_matrix = data["G_matrix"]
 		A_matrix = data["A_matrix"]
 		L_matrix = data["L_matrix"]
@@ -115,7 +60,7 @@ def get_dict(dmd: Literal["linear", "combined", "pre-computed", "non-linear"]):
 
 
 def main():
-	G_matrix, A_matrix, L_matrix, N, PSI_x= get_dict(dmd="non-linear")
+	G_matrix, A_matrix, L_matrix, N, PSI_x = get_dict(dmd="combined")
 
 	x_pts = np.arange(-1.5, 1.55, 0.05)
 	y_pts = np.arange(-1.5, 1.55, 0.05)
@@ -184,7 +129,6 @@ def main():
 
 	plot_error(lam1, ang1, res1)
 
-
 	# for ind2 it is the same as the one to perform the computation on the data file
 	# TODO make this either read from file or be defined before since I'll be using the raw data
 	m1 = 500
@@ -193,7 +137,7 @@ def main():
 	ind2 = np.arange(0, m2) + (m1 + 6000) + 500
 
 	logger.info("Loading raw data ..")
-	raw_file = loadmat("G:\\PycharmProjects\\ai4er\\resdmd\\ResDMDpy\\rdp\\examples\\Cylinder_data.mat")
+	raw_file = loadmat("D:\\PythonProjects\\ai4er\\ResDMDpy\\rdp\\examples\\Cylinder_data.mat")
 	logger.info("Done!")
 	raw_data = raw_file["DATA"]
 	obst_r = raw_file["obst_r"][0, 0]
@@ -209,6 +153,7 @@ def main():
 	# TODO: as it unnecessary to create more never used dimenesion.
 	# TODO: using enumerate would be a solution.
 
+	# TODO: maybe use dict here, so that the key is the power
 	contour_1 = np.zeros((21, 21))    # this works
 	contour_2 = [0] * 20    # This works
 	for power in tqdm([1, 2, 20]):
