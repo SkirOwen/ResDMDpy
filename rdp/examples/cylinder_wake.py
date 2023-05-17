@@ -17,7 +17,6 @@ plt.rcParams['text.usetex'] = True
 
 def plot_pseudospectra(D, RES, X, Y, x_pts, y_pts):
 	# TODO: fix the following plot code
-	# TODO: look at the 0,0 red dot on the plot
 	# Define v
 	v = np.power(10, np.arange(-2, 0.21, 0.2))
 
@@ -35,17 +34,21 @@ def plot_pseudospectra(D, RES, X, Y, x_pts, y_pts):
 	# plt.clim(np.log10(0.01), np.log10(1))
 	ax.set_ylim(y_pts[0], y_pts[-1])
 	ax.set_xlim(x_pts[0], x_pts[-1])
-	ax.set_aspect('equal')
 	ax.plot(np.real(D), np.imag(D), '.r')
 	ax.set_xlabel('Real axis')
 	ax.set_ylabel('Imaginary axis')
 	ax.set_title('Title')
+	fig.tight_layout()
+	# TODO: I would like less padding on the right
 	plt.show()
 
 
 def plot_eig_res(D, RES2):
 	fig, ax = plt.subplots()
 	ax.semilogy(np.angle(D), RES2, ".r", markersize=5)
+	ax.set_xlabel('Real axis')
+	ax.set_ylabel('Angle')  # TODO: check this
+	ax.set_title('Title')
 	plt.show()
 
 
@@ -55,11 +58,15 @@ def plot_error(lam1, ang1, res1):
 	ax.semilogy(res1, "d-")
 	ax.semilogy(np.real(ang1), "s-")
 	plt.legend(
-		[r'$|\lambda_{j}-\lambda_{1}^{j}|$', r'$\mathrm{res}(\lambda_{j}, g_{j})$', r'eigenspace error'],
+		[
+			r'$|\lambda_{j}-\lambda_{1}^{j}|$',
+			r'$\mathrm{res}(\lambda_{j}, g_{j})$',
+			r'eigenspace error'
+		],
 		fontsize=22
 	)
 	plt.ylim([10 ** (-14), 1])
-	plt.yticks(10 ** (-np.arange(14, -1, 2)))
+	# plt.yticks(10 ** (np.arange(14, 2, 2))) TODO: fix this
 	plt.xlim([0, 100])
 	plt.show()
 
@@ -189,9 +196,9 @@ def main():
 	raw_file = loadmat("G:\\PycharmProjects\\ai4er\\resdmd\\ResDMDpy\\rdp\\examples\\Cylinder_data.mat")
 	logger.info("Done!")
 	raw_data = raw_file["DATA"]
-	obst_r = raw_file["obst_r"]
-	obst_x = raw_file["obst_x"]
-	obst_y = raw_file["obst_y"]
+	obst_r = raw_file["obst_r"][0, 0]
+	obst_x = raw_file["obst_x"][0, 0]
+	obst_y = raw_file["obst_y"][0, 0]
 	x = raw_file["x"]
 	y = raw_file["y"]
 
@@ -211,23 +218,21 @@ def main():
 		tt = np.linalg.norm(PSI_x @ V[:, idd]) / np.sqrt(m2)
 		xi = np.linalg.pinv(V) @ np.linalg.pinv(PSI_x) @ raw_data[:(raw_data.shape[0] // 2), ind2].T
 		xi = xi[idd, :]
-		xi = -1j * xi.reshape(400, 100) * tt
+		xi = (-1j * xi.reshape(100, 400) * tt).T
 
 		h = plt.figure()
 		subplot_1 = plt.subplot(2, 1, 1)
 		d = 2 * obst_r
 		contour_1[power] = np.linspace(np.min(np.real(xi)), np.max(np.real(xi)), 21)
-		subplot_1.contourf(
+		plt.contourf(
 			(x - obst_x) / d,
 			(y - obst_y) / d,
 			np.real(xi),
 			contour_1[power],
-			edgecolor='none'
 		)
-		subplot_1.colorbar()    # TODO: fix this
-		subplot_1.axis('equal')
-		plt.tight_layout()      # TODO: check
-		subplot_1.fill(
+		plt.colorbar()    # TODO: fix this
+		plt.axis('equal')
+		plt.fill(
 			obst_r * np.cos(np.arange(0, 2 * np.pi, 0.01)) / d,
 			obst_r * np.sin(np.arange(0, 2 * np.pi, 0.01)) / d,
 			"r"
@@ -237,9 +242,10 @@ def main():
 		T = f"Mode {power} (real part)"
 		plt.title(T, fontsize=16)       # TODO: check
 		plt.box(True)
-		subplot_1.data_aspect_ratio = [1, 1, 1]
-		subplot_1.plot_box_aspect_ratio = [8.25, 2.25, 1]
-		# subplot_1.clim([np.min(contour_1[power]), np.max(contour_1[power])])   # TODO: fix
+		plt.data_aspect_ratio = [1, 1, 1]
+		plt.plot_box_aspect_ratio = [8.25, 2.25, 1]
+		plt.clim([np.min(contour_1[power]), np.max(contour_1[power])])   # TODO: fix
+		plt.tight_layout()      # TODO: check
 
 
 		subplot2 = plt.subplot(2, 1, 2)
@@ -250,25 +256,24 @@ def main():
 			(y - obst_y) / d,
 			np.abs(xi),
 			contour_2[power],
-			edgecolor='none'
 		)
-		subplot2.colorbar()
-		subplot2.axis('equal')
-		subplot2.tight_layout()
-		subplot2.fill(
+		plt.colorbar()
+		plt.axis('equal')
+		plt.tight_layout()
+		plt.fill(
 			obst_r * np.cos(np.arange(0, 2 * np.pi, 0.01)) / d,
 			obst_r * np.sin(np.arange(0, 2 * np.pi, 0.01)) / d,
 			"r"
 			# [200, 200, 200] / 255, edgecolor='none'
 		)
-		subplot2.xlim([-2, np.max((x - obst_x) / d)])
+		plt.xlim([-2, np.max((x - obst_x) / d)])
 		T = f"Mode {power} (absolute value)"
-		subplot2.title(T, fontsize=16)
-		subplot2.box(True)
-		subplot2.data_aspect_ratio = [1, 1, 1]
-		subplot2.plot_box_aspect_ratio = [8.25, 2.25, 1]
-		subplot2.clim([np.min(contour_2[power]), np.max(contour_2[power])])
-		h.set_position([360.0000, 262.3333, 560.0000, 355.6667])
+		plt.title(T, fontsize=16)
+		plt.box(True)
+		plt.data_aspect_ratio = [1, 1, 1]
+		plt.plot_box_aspect_ratio = [8.25, 2.25, 1]
+		plt.clim([np.min(contour_2[power]), np.max(contour_2[power])])
+		# h.set_position([360.0000, 262.3333, 560.0000, 355.6667])
 
 	plt.show()
 
