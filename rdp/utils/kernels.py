@@ -11,7 +11,7 @@ def kernel_resdmd(xa, ya, xb, yb, n, cut_off, y2=None, sketch=False) -> tuple[np
 	d = np.mean(np.vecnorm(xa - np.mean(xa.conj().T).conj().T))
 
 	s: int = np.max(np.ceil(5 * np.sqrt(m1 + m2) * np.log(m1 + m2)), 5000)
-	kernel_f = lambda x, y: np.exp(-np.vecnorm(x-y) / d)
+	kernel_f = lambda x, y: np.exp(-np.vecnorm(x - y) / d)
 
 	if sketch:
 		# TODO: check if it is log10, log2, or logn
