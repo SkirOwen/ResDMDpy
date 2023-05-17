@@ -25,9 +25,9 @@ def isom_meas(G: np.ndarray, A: np.ndarray, L, f, theta: np.ndarray, epsilon, or
 		for k in range(len(theta)):
 			for j in range(order):
 				lamb = np.exp(1j * theta[k]) * (1 + epsilon * delta[j])
-				Ij = np.linalg.solve((A - lamb * G), v1)
+				Ij = np.linalg.solve((A - lamb @ G), v1)
 				nu[k] = nu[k] - np.real(
-					1 / (2 * np.pi) * (c[j] * np.conj(lamb) * (Ij.H * v2) + d[j] * (v3.H * Ij))
+					1 / (2 * np.pi) * (c[j] * np.conj(lamb) * (Ij.conj().T @ v2) + d[j] * (v3.conj().T @ Ij))
 				)
 	else:
 		pass
