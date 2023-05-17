@@ -108,14 +108,14 @@ def main():
 
 	for j in range(100):
 		# find the indices of eigenvalues close to t1^j    (GPT???)
-		I2 = np.where(np.abs(lam - t1 ** (j + 1)) < max(0.001, 0 * max(lam1)))[0]
+		I2 = np.where(np.abs(lam - t1 ** (j + 1)) < 0.001)[0]
 		# TODO: max(0.001, 0) really useful, why is max(lam1) multiplied by 0 ?????
 		# TODO: look at np.nonzero
 
 		# check if only one eigenvalue was found
 		if len(I2) == 1:
 			# compute the error between the eigenspaces
-			b1 = evec_x[:, np.abs(lam - t1) < max(0.001, 0 * max(lam1))] ** (j + 1)
+			b1 = evec_x[:, np.abs(lam - t1) < 0.001] ** (j + 1)
 			b2 = evec_x[:, I2]
 			# TODO: fix invalid value incountered in arccos
 			ang1[j] = np.arccos(np.abs(b1.conj().T @ b2 / (np.linalg.norm(b1, 2) * np.linalg.norm(b2, 2))))
