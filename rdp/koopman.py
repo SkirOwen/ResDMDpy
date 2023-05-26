@@ -59,8 +59,6 @@ def koop_pseudo_spec(
 	# MATLAB norm is by default 2, whereas for numpy is frobenius for matrices
 	DG, VG = np.linalg.eig(G + np.linalg.norm(G, 2) * reg_param * np.eye(*G.shape))
 
-	# DG(abs(DG) > 0) = sqrt(1. / abs(DG(abs(DG) > 0)));
-	# SQ = VG * DG * (VG'); % needed to compute pseudospectra according to Gram matrix G
 	DG[abs(DG) > 0] = np.sqrt(1 / DG[abs(DG) > 0])  # TODO: this doesnt give the same results
 	SQ = VG @ np.diag(DG) @ VG.conj().T
 
