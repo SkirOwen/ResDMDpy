@@ -62,8 +62,7 @@ def koop_pseudo_spec(
 	# DG(abs(DG) > 0) = sqrt(1. / abs(DG(abs(DG) > 0)));
 	# SQ = VG * DG * (VG'); % needed to compute pseudospectra according to Gram matrix G
 	DG[abs(DG) > 0] = np.sqrt(1 / DG[abs(DG) > 0])  # TODO: this doesnt give the same results
-	SQ = VG @ (DG * np.identity(len(DG))) @ VG.conj().T
-	# TODO: DG * np.eye to make it diag, there must be a better way!
+	SQ = VG @ np.diag(DG) @ VG.conj().T
 
 	z_pts = z_pts.reshape(-1, 1)
 	LL = len(z_pts)
