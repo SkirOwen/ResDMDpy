@@ -12,7 +12,7 @@ def kernel_resdmd(
 		n: int,
 		cut_off,
 		y2=None,
-		sketch: bool = False
+		sketch: bool = False,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 	""""""
 	cut_off = 1e-12 if cut_off else 0

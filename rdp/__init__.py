@@ -10,4 +10,4 @@ logger = make_logger(
 	level="INFO"
 )
 
-from .utils.kernels import kernel_resdmd
+from .data.kernels import kernel_resdmd
