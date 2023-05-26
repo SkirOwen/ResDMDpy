@@ -166,22 +166,26 @@ def main():
 		idd = np.argmin(np.abs(D - lambda_))    # TODO: check this, seem good but return Number, and np.where an array
 		# TODO: matlab returns a Number
 		tt = np.linalg.norm(PSI_x @ V[:, idd]) / np.sqrt(m2)
-		xi = np.linalg.pinv(V) @ np.linalg.pinv(PSI_x) @ raw_data[:(raw_data.shape[0] // 2), ind2].T
-		xi = xi[idd, :]
-		xi = (-1j * xi.reshape(100, 400) * tt).T
 
-		h = plt.figure()
-		plt.subplot(2, 1, 1)
+		xi_ = xi[idd, :]
+		xi_ = (-1j * xi_.reshape(100, 400) * tt).T
+
+		contour_1[power] = np.linspace(np.min(np.real(xi_)), np.max(np.real(xi_)), 21)
+		contour_2[power] = np.linspace(0, np.max(np.abs(xi_)), 21)
+
 		d = 2 * obst_r
-		contour_1[power] = np.linspace(np.min(np.real(xi)), np.max(np.real(xi)), 21)
+		# Everything is normalized to the diameter
+		# TODO: would that not perturb the AI
+
+		plt.figure()
+		plt.subplot(2, 1, 1)
 		plt.contourf(
 			(x - obst_x) / d,
 			(y - obst_y) / d,
-			np.real(xi),
+			np.real(xi_),
 			contour_1[power],
 		)
-		plt.colorbar()    # TODO: fix this
-		# plt.axis('equal')
+		plt.colorbar()
 		plt.fill(
 			obst_r * np.cos(np.arange(0, 2 * np.pi, 0.01)) / d,
 			obst_r * np.sin(np.arange(0, 2 * np.pi, 0.01)) / d,
@@ -198,12 +202,10 @@ def main():
 		plt.tight_layout()      # TODO: check
 
 		plt.subplot(2, 1, 2)
-		d = 2 * obst_r
-		contour_2[power] = np.linspace(0, np.max(np.abs(xi)), 21)
 		plt.contourf(
 			(x - obst_x) / d,
 			(y - obst_y) / d,
-			np.abs(xi),
+			np.abs(xi_),
 			contour_2[power],
 		)
 		plt.colorbar()
@@ -224,8 +226,8 @@ def main():
 		plt.clim([np.min(contour_2[power]), np.max(contour_2[power])])
 		# h.set_position([360.0000, 262.3333, 560.0000, 355.6667])
 
-	plt.tight_layout()
-	plt.show()
+		plt.tight_layout()
+		plt.show()
 
 
 if __name__ == "__main__":
