@@ -184,6 +184,7 @@ def main():
 			(y - obst_y) / d,
 			np.real(xi_),
 			contour_1[power],
+			cmap=cm.cm.curl
 		)
 		plt.colorbar()
 		plt.fill(
@@ -207,10 +208,9 @@ def main():
 			(y - obst_y) / d,
 			np.abs(xi_),
 			contour_2[power],
+			cmap=cm.cm.curl
 		)
 		plt.colorbar()
-		plt.axis('equal')
-		plt.tight_layout()
 		plt.fill(
 			obst_r * np.cos(np.arange(0, 2 * np.pi, 0.01)) / d,
 			obst_r * np.sin(np.arange(0, 2 * np.pi, 0.01)) / d,
