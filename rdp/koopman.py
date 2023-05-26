@@ -6,21 +6,18 @@ from scipy.sparse.linalg import eigs, lobpcg, eigsh
 from tqdm import tqdm
 from functools import partial
 import multiprocessing
+from multiprocessing.pool import ThreadPool
 
 
 from rdp.utils.linalg_op import guarantee_hermitian
+from rdp import logger
 
-# KoopPseudoSpec
 
-
-def compute_RES(jj, SQ, L, A, G, z_pts):
+def compute_RES(arr):
+	# return np.sqrt(np.real(eigs(arr, 1, which='SM')[0]))
 	return np.sqrt(
 		np.real(
-			eigs(
-				SQ @ (L - z_pts[jj] * A.T - np.conj(z_pts[jj]) * A + (abs(z_pts[jj])**2) * G) @ SQ,
-				1,
-				which='SM'
-			)[0]
+			scipy.linalg.eigvalsh(arr, subset_by_index=[0, 0])
 		)
 	)
 
@@ -78,24 +75,27 @@ def koop_pseudo_spec(
 	print(LL)
 
 	if LL > 0:
+		logger.info("Calculating matrix")
+		result = SQ @ (L - z_pts[:, np.newaxis] * A.conj().T - np.conj(z_pts[:, np.newaxis]) * A + (np.abs(z_pts[:, np.newaxis])**2) * G) @ SQ
+		logger.info("Done!")
 		if parallel:
 			with multiprocessing.Pool() as pool:
-				func = partial(compute_RES, SQ=SQ, L=L, A=A, G=G, z_pts=z_pts)
-				for idx, res in enumerate(tqdm(pool.imap(func, range(LL)), total=LL)):
+				for idx, res in enumerate(tqdm(pool.imap(compute_RES, result), total=LL)):
 					RES[idx] = res
-
 		else:
+			# RES = test(result, LL)
 			for jj in tqdm(range(LL), desc="Koopman pseudospectra"):
+				RES[jj] = compute_RES(result[jj])
 
-				# "smallestabs in matlab is SM in scipy and sm in Octave and Matlab<R2017a
-				RES[jj] = np.sqrt(
-					np.real(
-						eigs(   # TODO: look eigsh after fixing bottleneck
-							SQ @ (L - z_pts[jj] * A.conj().T - np.conj(z_pts[jj]) * A + (abs(z_pts[jj])**2) * G) @ SQ,
-							1,
-							which='SM')[0]
-					)
-				)
+			# "smallestabs in matlab is SM in scipy and sm in Octave and Matlab<R2017a
+			# RES[jj] = np.sqrt(
+			# 	np.real(
+			# 		eigs(   # TODO: look eigsh after fixing bottleneck
+			# 			SQ @ (L - z_pts[jj] * A.conj().T - np.conj(z_pts[jj]) * A + (abs(z_pts[jj])**2) * G) @ SQ,
+			# 			1,
+			# 			which='SM')[0]
+			# 	)
+			# )
 
 	RES2 = []
 	V2 = []
