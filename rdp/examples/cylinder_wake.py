@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 
 from typing import Literal
 
+import cmocean as cm
+
 from tqdm import tqdm
 
 from rdp import logger
@@ -60,7 +62,7 @@ def get_dict(dmd: Literal["linear", "combined", "pre-computed", "non-linear"]):
 
 
 def main():
-	G_matrix, A_matrix, L_matrix, N, PSI_x = get_dict(dmd="combined")
+	G_matrix, A_matrix, L_matrix, N, PSI_x = get_dict(dmd="non-linear")
 
 	x_pts = np.arange(-1.5, 1.55, 0.05)
 	y_pts = np.arange(-1.5, 1.55, 0.05)
@@ -154,8 +156,11 @@ def main():
 	# TODO: using enumerate would be a solution.
 
 	# TODO: maybe use dict here, so that the key is the power
-	contour_1 = np.zeros((21, 21))    # this works
-	contour_2 = [0] * 20    # This works
+	contour_1 = np.zeros((21, 21))  # this works
+	contour_2 = [0] * 21            # This works
+
+	xi = np.linalg.pinv(V) @ np.linalg.pinv(PSI_x) @ raw_data[:(raw_data.shape[0] // 2), ind2].T
+
 	for power in tqdm([1, 2, 20]):
 		lambda_ = t1 ** power
 		idd = np.argmin(np.abs(D - lambda_))    # TODO: check this, seem good but return Number, and np.where an array
@@ -221,8 +226,6 @@ def main():
 
 	plt.tight_layout()
 	plt.show()
-
-
 
 
 if __name__ == "__main__":
