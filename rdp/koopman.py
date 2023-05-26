@@ -99,41 +99,34 @@ def koop_pseudo_spec(
 
 	RES2 = []
 	V2 = []
+
+	# if len(z_pts2):
+	# 	# TODO: do I really need this?
+	# 	RES2 = np.zeros((len(z_pts2), 1))
+	# 	V2 = np.zeros(G.shape[0], len(z_pts2))
 	#
-# 	if ~isempty(p.Results.z_pts2)
-# 		RES2=zeros(length(p.Results.z_pts2), 1);
-# 		V2=zeros(size(G, 1), length(p.Results.z_pts2));
-# 		pf = parfor_progress(length(p.Results.z_pts2));
-# 		pfcleanup = onCleanup( @ () delete(pf));
-# 		if p.Results.Parallel == "on"
-# 			parfor jj=1:length(p.Results.z_pts2)
-# 				warning('off', 'all')
-# 				[V, D] = eigs(
-# 					SQ * ((L) - p.Results.z_pts2(jj) * A'-conj(p.Results.z_pts2(jj))*A+(abs(p.Results.z_pts2(jj))^2)*G)*SQ,
-# 					1,
-# 					'smallestabs'
-# 				);
-# 				V2(:, jj) = V;
-# 				RES2(jj) = sqrt(real(D(1, 1)));
-# 				parfor_progress(pf);
-# 		end
-# 		else
-# 			for jj=1:length(p.Results.z_pts2)
-# 				[V, D] = eigs(
-# 					SQ * ((L) - p.Results.z_pts2(jj) * A'-conj(p.Results.z_pts2(jj))*A+(abs(p.Results.z_pts2(jj))^2)*G)*SQ,
-# 					1,
-# 					'smallestabs'
-# 				);
-# 				V2(:, jj) = V;
-# 				RES2(jj) = sqrt(real(D(1, 1)));
-# 				parfor_progress(pf);
-# 			end
-# 		end
-# 		V2 = SQ * V2;
-# 	end
-# 	#
-# 	warning('on', 'all')
-# 	#
+	# 	if parallel:
+	# 		for jj in range(len(z_pts2)):
+	# 			D, V = eigs(
+	# 				SQ @ (L - z_pts2[jj] * A.conj().T - np.conj(z_pts2[jj]) * A + (abs(z_pts2[jj])**2) * G) @ SQ,
+	# 				1,
+	# 				which="sn"
+	# 			)
+	#
+	# 			RES2[jj] = np.sqrt(np.real(D[0, 0]))
+	# 			V2[:, jj] = V.copy()
+	# 	else:
+	# 		for jj in range(len(z_pts2)):
+	# 			[V, D] = eigs(
+	# 				SQ @ (L - z_pts2[jj] * A.conj().T - np.conj(z_pts2[jj]) * A + (abs(z_pts2[jj])**2) * G) @ SQ,
+	# 				1,
+	# 				which="sm"
+	# 			)
+	# 			RES2[jj] = np.sqrt(np.real(D[0, 0]))
+	# 			V2[:, jj] = V.copy()
+	#
+	# 	V2 = SQ @ V2
+
 	return RES, RES2, V2
 #
 # # ErgodicMoments
