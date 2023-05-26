@@ -25,10 +25,14 @@ def guarantee_existence(path: str) -> str:
 
 
 # TODO: should I use pathlib???
-def guarantee_file_dl(filepath: str):
+def guarantee_file_dl(filepath: str, url: None | list = None) -> None:
+	# TODO: handle if url is not list???
+	# TODO: checksum
 	directory = os.path.dirname(filepath)
 	filename = os.path.basename(filepath)
 
 	if not os.path.exists(filepath):
-		url = get_url(filename)
+		logger.info(f"{filename} not present.")
+		url = get_url(filename) if url is None else url
+		logger.info(f"Downloading from {url}")
 		downloader(url, root=directory)
