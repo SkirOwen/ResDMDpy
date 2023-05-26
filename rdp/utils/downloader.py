@@ -18,6 +18,32 @@ from rdp import logger
 CHUNK_SIZE = 1024
 
 
+DL_URL = {
+	"Cylinder_data.mat": "",
+	"Cylinder_DMD.mat": "",
+	"Cylinder_EDMD.mat": "",
+	"dataset_1s_b.mat": "",
+	"dataset_1s.mat": "",
+	"double_pendulum_data.mat": "",
+	"EDMD_canopy_final.mat": "",
+	"HotWireData_Baseline.mat": "",
+	"HotWireData_FlowInjection.mat": "",
+	"LIP_times.mat": "",
+	"LIP.mat": "",
+	"mpEDMD_turbulent_data.mat": "",
+	"pendulum_data.m`at": "",
+}
+
+
+def get_url(filename: str) -> Iterable:
+	logger.info(f"Attempting to find a URL for the file.")
+	try:
+		url = DL_URL[filename]
+	except KeyError:
+		raise ValueError(f"No known URL to download {filename}.")
+	return [url]
+
+
 # def _credential_helper(base_url: str) -> tuple[str, str]:
 # 	"""Getting credentials from a file, and generating them if it does not exist"""
 #
