@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import numpy as np
 import scipy
 
 from rdp.utils.linalg_op import guarantee_hermitian
 
 
-def mpe(g, a):
+def mpe(g: np.ndarray, a: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 	g = guarantee_hermitian(g)
 	dg, vg = np.linalg.eig(g)
 	g_sqrt = vg @ dg @ vg.conj().T
