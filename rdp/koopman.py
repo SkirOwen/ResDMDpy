@@ -55,20 +55,16 @@ def koop_pseudo_spec(
 	G = guarantee_hermitian(G)
 	L = guarantee_hermitian(L)
 
-	G = (G + G.conj().T) / 2
-	L = (L + L.conj().T) / 2
 	# [VG, DG] = eig(G + norm(G) * (p.Results.reg_param) * eye(size(G)));
 	# MATLAB norm is by default 2, whereas for numpy is frobenius for matrices
 	DG, VG = np.linalg.eig(G + np.linalg.norm(G, 2) * reg_param * np.eye(*G.shape))
 
 	# DG(abs(DG) > 0) = sqrt(1. / abs(DG(abs(DG) > 0)));
 	# SQ = VG * DG * (VG'); % needed to compute pseudospectra according to Gram matrix G
-	# TODO: abs(DG[abs(DG)> 0]) sounds redundant
 	DG[abs(DG) > 0] = np.sqrt(1 / DG[abs(DG) > 0])  # TODO: this doesnt give the same results
 	SQ = VG @ (DG * np.identity(len(DG))) @ VG.conj().T
 	# TODO: DG * np.eye to make it diag, there must be a better way!
 
-	#
 	z_pts = z_pts.reshape(-1, 1)
 	LL = len(z_pts)
 	RES = np.zeros((LL, 1))
