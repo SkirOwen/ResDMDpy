@@ -150,10 +150,14 @@ def ergodic_moments(x: np.ndarray, n: int) -> np.ndarray:
 	"""
 	x = x.flatten()
 	m = len(x)
-	w = np.convolve(x, np.conj(np.flipud(x)))
+	mu = np.zeros(n + 1)
+	mu[0] = np.dot(x.conj().T, x) / (m * 2 * np.pi)
 
-	mu = np.zeros((1, n + 1))
-	mu[0] = np.dot(x) / (m * 2 * np.pi)
-	# TODO: WIP
+	w = np.convolve(x, np.conj(np.flip(x)))
+
+	mu[1: n+1] = w[m-2: n-1: -1].T / (2 * np.pi * np.arange(m-1, n, -1))
+	mu = np.concatenate((np.conj(np.flip(mu[1:])), mu))
+
+	return mu
 
 
