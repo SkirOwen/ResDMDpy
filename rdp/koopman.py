@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import numpy as np
 import scipy
 from scipy.sparse.linalg import eigs, lobpcg, eigsh
@@ -23,26 +25,35 @@ def compute_RES(jj, SQ, L, A, G, z_pts):
 	)
 
 
-def koop_pseudo_spec(G, A, L, z_pts, parallel=False, z_pts2=None, reg_param=1e-14):
-	# %Collect the optional inputs
-	# p = inputParser;
+def koop_pseudo_spec(
+		G: np.ndarray,
+		A: np.ndarray,
+		L: np.ndarray,
+		z_pts: np.ndarray,
+		parallel: bool = False,
+		z_pts2: None | np.ndarray = None,
+		reg_param: float = 1e-14
+) -> tuple:
+	"""
 
-	# %addRequired(p, 'G', @ isnumeric);
-	# %addRequired(p, 'A', @ isnumeric);
-	# %addRequired(p, 'L', @ isnumeric);
-	# %addRequired(p, 'z_pts', @ isnumeric);
+	Parameters
+	----------
+	G : 2d-ndarray
+	A : 2d-ndarray
+	L : 2d-ndarray
+	z_pts : 1d-ndarray
+	parallel : bool, optional
+		The default is False
+	z_pts2 : ndarray, optional
+		The default is None.
+	reg_param : float, Optional
+		The default is 1e-14
 
-	# validPar = {'on', 'off'};
-	# checkPar = @(x) any(validatestring(x, validPar));
+	Returns
+	-------
+	tuple
 
-	# addParameter(p, 'Parallel', 'off', checkPar)
-	# addParameter(p, 'z_pts2', [], @ isnumeric)
-	# addParameter(p, 'reg_param', 10 ^ (-14), @ isnumeric)
-
-	# p.CaseSensitive = false;
-	# parse(p, varargin{:})
-
-	# %%compute the pseudospectrum
+	"""
 	# safeguards
 	G = guarantee_hermitian(G)
 	L = guarantee_hermitian(L)
