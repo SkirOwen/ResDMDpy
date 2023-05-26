@@ -5,11 +5,11 @@ from rdp import kernel_resdmd
 
 
 def gen_from_file(
-	filepath: str,
-	n: int = 200,
-	m1: int = 500,
-	m2: int = 1000,
-	use_dmd: int = 1  # TODO: change this to a bool maybe
+		filepath: str,
+		n: int = 200,
+		m1: int = 500,
+		m2: int = 1000,
+		use_dmd: int = 1,  # TODO: change this to a bool maybe
 ) -> tuple[np.ndarray, np.ndarray]:
 	""""""
 	data = scipy.io.loadmat(filepath)
