@@ -148,7 +148,7 @@ def url_download(url: str, path: str, task: int = 1, total: int = 1) -> None:
 	logger.debug(f"Downloaded in {path}")
 
 
-def downloader(urls: Iterable[str], root: str = get_download_dir()):
+def downloader(urls: Iterable[str], root: str):
 	"""
 	Downloader to download multiple files.
 	"""
@@ -175,8 +175,8 @@ def main():
 	response = _get_response(url[0])
 	print(response)
 
-	target_dist = get_download_dir()
-	downloader(url, target_dist)
+	# target_dist = get_download_dir()
+	# downloader(url, target_dist)
 
 
 if __name__ == '__main__':
