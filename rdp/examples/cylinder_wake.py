@@ -15,12 +15,14 @@ from rdp.koopman import koop_pseudo_spec
 from rdp.utils.mat_loader import loadmat
 from rdp.utils.plotting import plot_pseudospectra, plot_eig_res, plot_error
 
+from rdp.examples import load_cylinder_data, load_cylinder_dmd, load_cylinder_edmd
+
 plt.rcParams['text.usetex'] = True
 
 
 def get_dict(dmd: Literal["linear", "combined", "pre-computed", "non-linear"]):
 	if dmd == "linear":
-		data = scipy.io.loadmat("D:\\PythonProjects\\ai4er\\ResDMDpy\\rdp\\examples\\Cylinder_DMD.mat")
+		data = load_cylinder_dmd()
 		G_matrix = data["G_matrix"]
 		A_matrix = data["A_matrix"]
 		L_matrix = data["L_matrix"]
@@ -28,10 +30,10 @@ def get_dict(dmd: Literal["linear", "combined", "pre-computed", "non-linear"]):
 		PSI_x = data["PSI_x"]
 
 	elif dmd == "combined":
-		data_dmd = scipy.io.loadmat("D:\\PythonProjects\\ai4er\\ResDMDpy\\rdp\\examples\\Cylinder_DMD.mat")
+		data_dmd = load_cylinder_dmd()
 		PSI_x0 = data_dmd["PSI_x"]
 		PSI_y0 = data_dmd["PSI_y"]
-		data_edmd = scipy.io.loadmat("D:\\PythonProjects\\ai4er\\ResDMDpy\\rdp\\examples\\Cylinder_EDMD.mat")
+		data_edmd = load_cylinder_edmd()
 		N = 2 * data_edmd["N"][0, 0]
 		PSI_x = np.hstack([data_edmd["PSI_x"], PSI_x0])
 		PSI_y = np.hstack([data_edmd["PSI_y"], PSI_y0])
@@ -41,7 +43,7 @@ def get_dict(dmd: Literal["linear", "combined", "pre-computed", "non-linear"]):
 		L_matrix = (PSI_y.conj().T @ PSI_y) / data_edmd["M2"]
 
 	elif dmd == "non-linear":
-		data_edmd = scipy.io.loadmat("D:\\PythonProjects\\ai4er\\ResDMDpy\\rdp\\examples\\Cylinder_EDMD.mat")
+		data_edmd = load_cylinder_edmd()
 		N = data_edmd["N"][0, 0]
 		PSI_x = data_edmd["PSI_x"]
 		PSI_y = data_edmd["PSI_y"]
@@ -51,7 +53,7 @@ def get_dict(dmd: Literal["linear", "combined", "pre-computed", "non-linear"]):
 		L_matrix = (PSI_y.conj().T @ PSI_y) / data_edmd["M2"]
 
 	else:   # pre-computed
-		data = scipy.io.loadmat("D:\\PythonProjects\\ai4er\\ResDMDpy\\rdp\\examples\\Cylinder_EDMD.mat")
+		data = load_cylinder_edmd()
 		G_matrix = data["G_matrix"]
 		A_matrix = data["A_matrix"]
 		L_matrix = data["L_matrix"]
@@ -139,7 +141,7 @@ def main():
 	ind2 = np.arange(0, m2) + (m1 + 6000) + 500
 
 	logger.info("Loading raw data ..")
-	raw_file = loadmat("D:\\PythonProjects\\ai4er\\ResDMDpy\\rdp\\examples\\Cylinder_data.mat")
+	raw_file = load_cylinder_data()
 	logger.info("Done!")
 	raw_data = raw_file["DATA"]
 	obst_r = raw_file["obst_r"][0, 0]
