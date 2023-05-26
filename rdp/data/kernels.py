@@ -10,7 +10,7 @@ def kernel_resdmd(
 		xb: np.ndarray,
 		yb: np.ndarray,
 		n: int,
-		cut_off,
+		cut_off: bool,
 		y2=None,
 		sketch: bool = False,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -26,8 +26,6 @@ def kernel_resdmd(
 	kernel_f = lambda x, y: np.exp(-np.vecnorm(x - y) / d)
 
 	if sketch:
-		# TODO: check if it is log10, log2, or logn
-
 		z = np.sqrt(2 / d**2) * np.random.randn([xa.shape[0], s])
 		th = 2 * np.pi * np.random.randn(s, 1)
 
@@ -88,23 +86,29 @@ def kernel_resdmd(
 			psi_y2 = np.max(psi_y2, 0) @ p
 
 	else:
-		psi_x = np.zeros(m2, m1)
-		psi_y = np.zeros(m2, m1)
-		if y2 is not None:
-			psi_y2 = np.zeros(m2, m1)
+		# psi_x = np.zeros(m2, m1)
+		# psi_y = np.zeros(m2, m1)
+		# if y2 is not None:
+		# 	psi_y2 = np.zeros(m2, m1)
 
 		# I think I can vectorise this
-		for i in tqdm(range(m2)):
-			psi_x[i, :] = kernel_f(xb[:, i], xa)
-			psi_y[i, :] = kernel_f(yb[:, i], xa)
+		# for i in tqdm(range(m2)):
+		# 	psi_x[i, :] = kernel_f(xb[:, i], xa)
+		# 	psi_y[i, :] = kernel_f(yb[:, i], xa)
+		#
+		# 	if y2 is not None:
+		# 		psi_y2[i, :] = kernel_f(xb[:, i], xa)
 
-			if y2 is not None:
-				psi_y2[i, :] = kernel_f(xb[:, i], xa)
+		psi_x = kernel_f(xb.T, xa)
+		psi_y = kernel_f(yb.T, xa)
+		# if y2 is not None:
+		# 	psi_y2 = kernel_f(xb.T, xa)
 
-		psi_x = psi_x @ p  # test if @= works
+		psi_x = psi_x @ p  # @= (in-place) is not yet supported
 		psi_y = psi_y @ p
 
 		if y2 is not None:
+			psi_y2 = kernel_f(xb.T, xa)
 			psi_y2 = psi_y2 @ p
 
 	return psi_x, psi_y, psi_y2
