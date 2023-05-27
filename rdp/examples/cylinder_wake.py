@@ -229,5 +229,20 @@ def get_koop_modes(obstacle: bool = True) -> tuple:
 	pass
 
 
+def save_mode_png(xi_):
+	image_data = np.real(xi_.T)
+	# TODO: also do that for the abs
+
+	# Normalize the image data to the range [0, 255]
+	normalized_data = ((image_data - np.min(image_data)) / (np.max(image_data) - np.min(image_data))) * 255
+	normalized_data = normalized_data.astype(np.uint8)
+
+	# Create a PIL Image object from the normalized image data
+	image = Image.fromarray(normalized_data, mode="L")  # "L" mode represents grayscale images
+
+	# Save the image as a PNG file
+	image.save("data_image.png")
+
+
 if __name__ == "__main__":
 	main()
