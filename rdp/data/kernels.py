@@ -57,7 +57,7 @@ def kernel_resdmd(
 	d0[d0 < cut_off] = 0
 
 	# TODO: something to do with ma here
-	sig = np.sqrt(d0)
+	sig = np.sqrt(np.diag(d0))
 	sig_dag = np.zeros(sig.shape)
 	sig_dag[sig > 0] = 1 / sig[sig > 0]
 
