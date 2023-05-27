@@ -4,6 +4,10 @@ import numpy as np
 from tqdm import tqdm
 
 
+def kernel_f(x, y, d):
+	return np.exp(-np.linalg.norm(x - y) / d)
+
+
 def kernel_resdmd(
 		xa: np.ndarray,
 		ya: np.ndarray,
@@ -20,10 +24,10 @@ def kernel_resdmd(
 	m1 = xa.shape[1]
 	m2 = xb.shape[1]
 	# TODO: why mean(xa.H).H ?
-	d = np.mean(np.vecnorm(xa - np.mean(xa.conj().T).conj().T))
+	# vecnorm is the norm euclidian norm
+	d = np.mean(np.linalg.norm(xa - np.mean(xa.conj().T).conj().T))
 
-	s: int = np.max(np.ceil(5 * np.sqrt(m1 + m2) * np.log(m1 + m2)), 5000)
-	kernel_f = lambda x, y: np.exp(-np.vecnorm(x - y) / d)
+	s: int = max(np.ceil(5 * np.sqrt(m1 + m2) * np.log(m1 + m2)), 5000)
 
 	if sketch:
 		z = np.sqrt(2 / d**2) * np.random.randn([xa.shape[0], s])
@@ -45,11 +49,11 @@ def kernel_resdmd(
 
 		for i in tqdm(range(m1)):
 			# TODO: I think I can vectorise this loop
-			g1[i, :] = kernel_f(xa[:, i], xa)
-			a1[i, :] = kernel_f(ya[:, i], xa)
+			g1[i, :] = kernel_f(xa[:, i][:, np.newaxis], xa, d)
+			a1[i, :] = kernel_f(ya[:, i][:, np.newaxis], xa, d)
 
 	# TODO: have a function for this
-	d0, u = np.linalg.eig(g1 + np.norm(g1, 2) * cut_off * np.eye(*g1.shape))
+	d0, u = np.linalg.eig(g1 + np.linalg.norm(g1, 2) * cut_off * np.eye(*g1.shape))
 	d0[d0 < cut_off] = 0
 
 	# TODO: something to do with ma here
@@ -92,15 +96,15 @@ def kernel_resdmd(
 		# 	psi_y2 = np.zeros(m2, m1)
 
 		# I think I can vectorise this
-		# for i in tqdm(range(m2)):
-		# 	psi_x[i, :] = kernel_f(xb[:, i], xa)
-		# 	psi_y[i, :] = kernel_f(yb[:, i], xa)
+		for i in tqdm(range(m2)):
+			psi_x[i, :] = kernel_f(xb[:, i][:, np.newaxis], xa, d)
+			psi_y[i, :] = kernel_f(yb[:, i][:, np.newaxis], xa, d)
 		#
 		# 	if y2 is not None:
 		# 		psi_y2[i, :] = kernel_f(xb[:, i], xa)
 
-		psi_x = kernel_f(xb.T, xa)
-		psi_y = kernel_f(yb.T, xa)
+		psi_x = kernel_f(xb.T, xa, d)
+		psi_y = kernel_f(yb.T, xa, d)
 		# if y2 is not None:
 		# 	psi_y2 = kernel_f(xb.T, xa)
 
@@ -108,7 +112,7 @@ def kernel_resdmd(
 		psi_y = psi_y @ p
 
 		if y2 is not None:
-			psi_y2 = kernel_f(xb.T, xa)
+			psi_y2 = kernel_f(xb.T, xa, d)
 			psi_y2 = psi_y2 @ p
 
 	return psi_x, psi_y, psi_y2
