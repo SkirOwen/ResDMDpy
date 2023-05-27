@@ -40,8 +40,8 @@ def kernel_resdmd(
 		# ditto
 		a1[a1 < 0] = 0
 	else:
-		g1 = np.zeros(m1, m1)
-		a1 = np.zeros(m1, m1)
+		g1 = np.zeros((m1, m1))
+		a1 = np.zeros((m1, m1))
 
 		for i in tqdm(range(m1)):
 			# TODO: I think I can vectorise this loop
@@ -86,8 +86,8 @@ def kernel_resdmd(
 			psi_y2 = np.max(psi_y2, 0) @ p
 
 	else:
-		# psi_x = np.zeros(m2, m1)
-		# psi_y = np.zeros(m2, m1)
+		psi_x = np.zeros((m2, m1))
+		psi_y = np.zeros((m2, m1))
 		# if y2 is not None:
 		# 	psi_y2 = np.zeros(m2, m1)
 
