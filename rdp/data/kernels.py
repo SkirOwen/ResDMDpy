@@ -64,8 +64,9 @@ def kernel_resdmd(
 	k_hat = sig_dag @ u.conj().T @ a1 @ u @ sig_dag
 	d1, u1 = np.linalg.eig(k_hat)
 
-	# TODO: what is this?	
-	I = np.where(abs(np.diag(d1)) > cut_off)
+	# TODO: what is this?
+	# TODO: look at non-zero
+	I = np.where(abs(d1) > cut_off)[0]
 
 	if len(I) > n:
 		_, I = np.sort(abs(np.diag(d1)), order="desc")
