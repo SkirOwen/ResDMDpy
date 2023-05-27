@@ -69,7 +69,8 @@ def kernel_resdmd(
 	I = np.where(abs(d1) > cut_off)[0]
 
 	if len(I) > n:
-		_, I = np.sort(abs(np.diag(d1)), order="desc")
+		# [~,I]=sort(abs(diag(D1)),'descend');
+		I = np.flip(np.argsort(abs(d1)))
 	else:
 		n = len(I)
 
