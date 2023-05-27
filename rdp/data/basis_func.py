@@ -18,21 +18,22 @@ def gen_from_file(
 	# TODO: this slicing returns the right thing, but I think there is a nicer way
 	# I had to do a +1 for ind2
 
-	if use_dmd != 1:
+	if use_dmd == 1:
+		_, s, vh = np.linalg.svd(data["DATA"][:, ind1].T / np.sqrt(m1), full_matrices=False)
+		# TODO: during the svd, at least two columns of vh (2, and 4) have their sign flipped compare to matlab
+		# the vh returned by svd is the hermitian of the v in matlab
+		# TODO: check if having vh instead of v is important
+		psi_x = data["DATA"][:, ind2].T     @ vh.conj().T[:, :n] @ np.diag(1 / s[:n])
+		psi_y = data["DATA"][:, ind2 + 1].T @ vh.conj().T[:, :n] @ np.diag(1 / s[:n])
+	else:
 		psi_x, psi_y, _ = kernel_resdmd(
-			data[:, ind1],
-			data[:, ind1 + 1],
-			data[:, ind2],
-			data[:, ind2 + 1],
+			data["DATA"][:, ind1],
+			data["DATA"][:, ind1 + 1],
+			data["DATA"][:, ind2],
+			data["DATA"][:, ind2 + 1],
 			n=n,
 			cut_off=False,
 		)
-	else:
-		_, s, vh = np.linalg.svd(data[:, ind1].T / np.sqrt(m1), full_matrices=False)
-		# the vh returned by svd is the hermitian of the v in matlab
-		psi_x = data[:, ind2].T @ vh[:n, :].T @ np.diag(1 / s[:n])
-		# TODO: check if having vh instead of v is important
-		psi_y = data[:, ind2 + 1].T @ vh[:n, :].T @ np.diag(1 / s[:n])
 
 	return psi_x, psi_y
 		
