@@ -146,20 +146,14 @@ def main():
 	x = raw_file["x"]
 	y = raw_file["y"]
 
-	# the issue here is, I create an array which going to become 2D later, i.e change of type
-	# and numpy as not happy.
-	# I can either preset the size of the array or use a list
-	# TODO: also maybe preparing the array to the correct size of the power we are going for
-	# TODO: as it unnecessary to create more never used dimenesion.
-	# TODO: using enumerate would be a solution.
-
-	# TODO: maybe use dict here, so that the key is the power
-	contour_1 = np.zeros((21, 21))  # this works
-	contour_2 = [0] * 21            # This works
+	powers = [1, 2, 20]
+	contour_1 = np.zeros((len(powers), 21))  # this works
+	contour_2 = np.zeros((len(powers) + 1, 21))
+	# contour_2 = [0] * (max(powers) + 1)            # This works
 
 	xi = np.linalg.pinv(V) @ np.linalg.pinv(PSI_x) @ raw_data[:(raw_data.shape[0] // 2), ind2].T
 
-	for power in tqdm([1, 2, 20]):
+	for i, power in enumerate(tqdm(powers)):
 		lambda_ = t1 ** power
 		idd = np.argmin(np.abs(D - lambda_))    # TODO: check this, seem good but return Number, and np.where an array
 		# TODO: matlab returns a Number
@@ -168,8 +162,8 @@ def main():
 		xi_ = xi[idd, :]
 		xi_ = (-1j * xi_.reshape(100, 400) * tt).T
 
-		contour_1[power] = np.linspace(np.min(np.real(xi_)), np.max(np.real(xi_)), 21)
-		contour_2[power] = np.linspace(0, np.max(np.abs(xi_)), 21)
+		contour_1[i] = np.linspace(np.min(np.real(xi_)), np.max(np.real(xi_)), 21)
+		contour_2[i] = np.linspace(0, np.max(np.abs(xi_)), 21)
 
 		d = 2 * obst_r
 		# Everything is normalized to the diameter
@@ -184,7 +178,7 @@ def main():
 			(x - obst_x) / d,
 			(y - obst_y) / d,
 			np.real(xi_),
-			contour_1[power],
+			contour_1[i],
 			# cmap=cm.cm.curl
 		)
 		plt.colorbar()
@@ -200,7 +194,7 @@ def main():
 		plt.box(True)
 		plt.data_aspect_ratio = [1, 1, 1]
 		plt.plot_box_aspect_ratio = [8.25, 2.25, 1]
-		plt.clim([np.min(contour_1[power]), np.max(contour_1[power])])   # TODO: fix
+		plt.clim([np.min(contour_1[i]), np.max(contour_1[i])])   # TODO: fix
 		plt.tight_layout()      # TODO: check
 
 		plt.subplot(2, 1, 2)
@@ -208,7 +202,7 @@ def main():
 			(x - obst_x) / d,
 			(y - obst_y) / d,
 			np.abs(xi_),
-			contour_2[power],
+			contour_2[i],
 			# cmap=cm.cm.curl
 		)
 		plt.colorbar()
@@ -224,7 +218,7 @@ def main():
 		plt.box(True)
 		plt.data_aspect_ratio = [1, 1, 1]
 		plt.plot_box_aspect_ratio = [8.25, 2.25, 1]
-		plt.clim([np.min(contour_2[power]), np.max(contour_2[power])])
+		plt.clim([np.min(contour_2[i]), np.max(contour_2[i])])
 		# h.set_position([360.0000, 262.3333, 560.0000, 355.6667])
 
 		plt.tight_layout()
