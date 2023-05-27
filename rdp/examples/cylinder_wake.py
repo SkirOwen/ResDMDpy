@@ -1,18 +1,14 @@
 from __future__ import annotations
 
+# import cmocean as cm
 import numpy as np
-import scipy
 import matplotlib.pyplot as plt
 
 from typing import Literal
-
-import cmocean as cm
-
 from tqdm import tqdm
 
 from rdp import logger
 from rdp.koopman import koop_pseudo_spec
-from rdp.utils.mat_loader import loadmat
 from rdp.utils.plotting import plot_pseudospectra, plot_eig_res, plot_error
 
 from rdp.examples import load_cylinder_data, load_cylinder_dmd, load_cylinder_edmd
@@ -177,8 +173,11 @@ def main():
 
 		d = 2 * obst_r
 		# Everything is normalized to the diameter
-		# TODO: would that not perturb the AI
+		# TODO: would that not perturb the AI, as real data cannot be normalised to the size of the obstacle
+		# What if the data was normalized using a predicted size?
+		# What if normalising the data to the size of the tidal turbine
 
+		# TODO: subplots, and be in a function?
 		plt.figure()
 		plt.subplot(2, 1, 1)
 		plt.contourf(
@@ -186,7 +185,7 @@ def main():
 			(y - obst_y) / d,
 			np.real(xi_),
 			contour_1[power],
-			cmap=cm.cm.curl
+			# cmap=cm.cm.curl
 		)
 		plt.colorbar()
 		plt.fill(
@@ -210,7 +209,7 @@ def main():
 			(y - obst_y) / d,
 			np.abs(xi_),
 			contour_2[power],
-			cmap=cm.cm.curl
+			# cmap=cm.cm.curl
 		)
 		plt.colorbar()
 		plt.fill(
@@ -230,6 +229,10 @@ def main():
 
 		plt.tight_layout()
 		plt.show()
+
+
+def get_koop_modes(obstacle: bool = True) -> tuple:
+	pass
 
 
 if __name__ == "__main__":
