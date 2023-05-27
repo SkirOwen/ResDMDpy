@@ -223,10 +223,19 @@ def main():
 
 		plt.tight_layout()
 		plt.show()
+	save_xi(xi, powers, obst_x, obst_y, obst_r, xy=x.shape)
+
+	# x.shape -> 400, 100
+	# but for a meshgrid
+	# it should be meshgrid(arange(100) arange(400)) starting at 1 to 400
 
 
 def get_koop_modes(obstacle: bool = True) -> tuple:
 	pass
+
+
+def save_xi(xi, powers, obst_x, obst_y, obst_r, xy: tuple):
+	np.savez("test", xi=xi, powers=powers, obst_x=obst_x, obst_y=obst_y, obst_r=obst_r, xy=xy)
 
 
 def save_mode_png(xi_):
