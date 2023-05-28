@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-# import cmocean as cm
+import cmocean as cm
 import numpy as np
 import matplotlib.pyplot as plt
+from PIL import Image
 
-from typing import Literal
+from typing import Literal, Iterable
 from tqdm import tqdm
 
 from rdp import logger
@@ -128,7 +129,11 @@ def main():
 	ang1[0], lam1[0], res1[0] = 0, 0, 0
 
 	plot_error(lam1, ang1, res1)
+	powers = [1, 2, 20]
+	gen_koop_modes(V, PSI_x, t1, D, powers)
 
+
+def gen_koop_modes(V, PSI_x, t1: int, D, powers: Iterable):
 	# for ind2 it is the same as the one to perform the computation on the data file
 	# TODO make this either read from file or be defined before since I'll be using the raw data
 	m1 = 500
@@ -146,7 +151,7 @@ def main():
 	x = raw_file["x"]
 	y = raw_file["y"]
 
-	powers = [1, 2, 20]
+	# TODO: what does it mean to have a non-int power?
 	contour_1 = np.zeros((len(powers), 21))  # this works
 	contour_2 = np.zeros((len(powers) + 1, 21))
 	# contour_2 = [0] * (max(powers) + 1)            # This works
@@ -165,80 +170,89 @@ def main():
 		contour_1[i] = np.linspace(np.min(np.real(xi_)), np.max(np.real(xi_)), 21)
 		contour_2[i] = np.linspace(0, np.max(np.abs(xi_)), 21)
 
-		d = 2 * obst_r
-		# Everything is normalized to the diameter
-		# TODO: would that not perturb the AI, as real data cannot be normalised to the size of the obstacle
-		# What if the data was normalized using a predicted size?
-		# What if normalising the data to the size of the tidal turbine
-
-		# TODO: subplots, and be in a function?
-		plt.figure()
-		plt.subplot(2, 1, 1)
-		plt.contourf(
-			(x - obst_x) / d,
-			(y - obst_y) / d,
-			np.real(xi_),
-			contour_1[i],
-			# cmap=cm.cm.curl
-		)
-		plt.colorbar()
-		plt.fill(
-			obst_r * np.cos(np.arange(0, 2 * np.pi, 0.01)) / d,
-			obst_r * np.sin(np.arange(0, 2 * np.pi, 0.01)) / d,
-			"r"
-			# [200, 200, 200] / 255, edgecolor='none'
-		)
-		plt.xlim([-2, np.max((x - obst_x) / d)])        # TODO: check
-		T = f"Mode {power} (real part)"
-		plt.title(T, fontsize=16)       # TODO: check
-		plt.box(True)
-		plt.data_aspect_ratio = [1, 1, 1]
-		plt.plot_box_aspect_ratio = [8.25, 2.25, 1]
-		plt.clim([np.min(contour_1[i]), np.max(contour_1[i])])   # TODO: fix
-		plt.tight_layout()      # TODO: check
-
-		plt.subplot(2, 1, 2)
-		plt.contourf(
-			(x - obst_x) / d,
-			(y - obst_y) / d,
-			np.abs(xi_),
-			contour_2[i],
-			# cmap=cm.cm.curl
-		)
-		plt.colorbar()
-		plt.fill(
-			obst_r * np.cos(np.arange(0, 2 * np.pi, 0.01)) / d,
-			obst_r * np.sin(np.arange(0, 2 * np.pi, 0.01)) / d,
-			"r"
-			# [200, 200, 200] / 255, edgecolor='none'
-		)
-		plt.xlim([-2, np.max((x - obst_x) / d)])
-		T = f"Mode {power} (absolute value)"
-		plt.title(T, fontsize=16)
-		plt.box(True)
-		plt.data_aspect_ratio = [1, 1, 1]
-		plt.plot_box_aspect_ratio = [8.25, 2.25, 1]
-		plt.clim([np.min(contour_2[i]), np.max(contour_2[i])])
-		# h.set_position([360.0000, 262.3333, 560.0000, 355.6667])
-
-		plt.tight_layout()
-		plt.show()
-	save_xi(xi, powers, obst_x, obst_y, obst_r, xy=x.shape)
+		plot_koop_mode(xi_, power, contour_1[i], contour_2[i], obst_x, obst_y, obst_r, x, y)
+	# save_xi(xi, powers, obst_x, obst_y, obst_r, xy=x.shape)
 
 	# x.shape -> 400, 100
 	# but for a meshgrid
 	# it should be meshgrid(arange(100) arange(400)) starting at 1 to 400
 
 
-def get_koop_modes(obstacle: bool = True) -> tuple:
-	pass
+def plot_koop_mode(
+		xi_: np.ndarray,
+		power: int,
+		contourp_1: np.ndarray,
+		contourp_2: np.ndarray,
+		obst_x: float,
+		obst_y: float,
+		obst_r: float,
+		x,
+		y,
+) -> None:
+	d = 2 * obst_r
+
+	# 	# Everything is normalized to the diameter
+	# 	# TODO: would that not perturb the AI, as real data cannot be normalised to the size of the obstacle
+	# 	# What if the data was normalized using a predicted size?
+	# 	# What if normalising the data to the size of the tidal turbine
+	plt.figure()
+	plt.subplot(2, 1, 1)
+	plt.contourf(
+		(x - obst_x) / d,
+		(y - obst_y) / d,
+		np.real(xi_),
+		contourp_1,
+		cmap=cm.cm.curl
+	)
+	plt.colorbar()
+	plt.fill(
+		obst_r * np.cos(np.arange(0, 2 * np.pi, 0.01)) / d,
+		obst_r * np.sin(np.arange(0, 2 * np.pi, 0.01)) / d,
+		"r"
+		# [200, 200, 200] / 255, edgecolor='none'
+	)
+	plt.xlim([-2, np.max((x - obst_x) / d)])  # TODO: check
+	T = f"Mode {power} (real part)"
+	plt.title(T, fontsize=16)  # TODO: check
+	plt.box(True)
+	plt.data_aspect_ratio = [1, 1, 1]
+	plt.plot_box_aspect_ratio = [8.25, 2.25, 1]
+	plt.clim([np.min(contourp_1), np.max(contourp_1)])  # TODO: fix
+	plt.tight_layout()  # TODO: check
+
+	plt.subplot(2, 1, 2)
+	plt.contourf(
+		(x - obst_x) / d,
+		(y - obst_y) / d,
+		np.abs(xi_),
+		contourp_2,
+		cmap=cm.cm.curl
+	)
+	plt.colorbar()
+	plt.fill(
+		obst_r * np.cos(np.arange(0, 2 * np.pi, 0.01)) / d,
+		obst_r * np.sin(np.arange(0, 2 * np.pi, 0.01)) / d,
+		"r"
+		# [200, 200, 200] / 255, edgecolor='none'
+	)
+	plt.xlim([-2, np.max((x - obst_x) / d)])
+	T = f"Mode {power} (absolute value)"
+	plt.title(T, fontsize=16)
+	plt.box(True)
+	plt.data_aspect_ratio = [1, 1, 1]
+	plt.plot_box_aspect_ratio = [8.25, 2.25, 1]
+	plt.clim([np.min(contourp_2), np.max(contourp_2)])
+	# h.set_position([360.0000, 262.3333, 560.0000, 355.6667])
+
+	plt.tight_layout()
+	plt.show()
 
 
 def save_xi(xi, powers, obst_x, obst_y, obst_r, xy: tuple):
 	np.savez("test", xi=xi, powers=powers, obst_x=obst_x, obst_y=obst_y, obst_r=obst_r, xy=xy)
 
 
-def save_mode_png(xi_):
+def save_mode_png(xi_) -> None:
 	image_data = np.real(xi_.T)
 	# TODO: also do that for the abs
 
