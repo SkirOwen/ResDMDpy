@@ -195,54 +195,55 @@ def plot_koop_mode(
 	# 	# TODO: would that not perturb the AI, as real data cannot be normalised to the size of the obstacle
 	# 	# What if the data was normalized using a predicted size?
 	# 	# What if normalising the data to the size of the tidal turbine
-	plt.figure()
-	plt.subplot(2, 1, 1)
-	plt.contourf(
+	fig, axs = plt.subplots(2, 1)
+
+	c1 = axs[0].contourf(
 		(x - obst_x) / d,
 		(y - obst_y) / d,
 		np.real(xi_),
 		contourp_1,
-		cmap=cm.cm.curl
+		cmap=cm.cm.curl,
+		vmin=np.min(contourp_1),
+		vmax=np.max(contourp_1)
 	)
-	plt.colorbar()
-	plt.fill(
-		obst_r * np.cos(np.arange(0, 2 * np.pi, 0.01)) / d,
-		obst_r * np.sin(np.arange(0, 2 * np.pi, 0.01)) / d,
-		"r"
-		# [200, 200, 200] / 255, edgecolor='none'
-	)
-	plt.xlim([-2, np.max((x - obst_x) / d)])  # TODO: check
-	T = f"Mode {power} (real part)"
-	plt.title(T, fontsize=16)  # TODO: check
-	plt.box(True)
-	plt.data_aspect_ratio = [1, 1, 1]
-	plt.plot_box_aspect_ratio = [8.25, 2.25, 1]
-	plt.clim([np.min(contourp_1), np.max(contourp_1)])  # TODO: fix
-	plt.tight_layout()  # TODO: check
+	cbar1 = fig.colorbar(c1, ax=axs[0])
+	cbar1.formatter.set_powerlimits((-2, 2))  # Display colorbar tick labels in scientific notation
+	cbar1.update_ticks()
 
-	plt.subplot(2, 1, 2)
-	plt.contourf(
-		(x - obst_x) / d,
-		(y - obst_y) / d,
-		np.abs(xi_),
-		contourp_2,
-		cmap=cm.cm.curl
-	)
-	plt.colorbar()
-	plt.fill(
+	axs[0].fill(
 		obst_r * np.cos(np.arange(0, 2 * np.pi, 0.01)) / d,
 		obst_r * np.sin(np.arange(0, 2 * np.pi, 0.01)) / d,
 		"r"
-		# [200, 200, 200] / 255, edgecolor='none'
 	)
-	plt.xlim([-2, np.max((x - obst_x) / d)])
+	axs[0].set_xlim([-2, np.max((x - obst_x) / d)])
+	T = f"Mode {power} (real part)"
+	axs[0].set_title(T, fontsize=16)
+	axs[0].set_frame_on(True)  # Enable the frame around the subplot
+	axs[0].set_aspect('equal')  # Set the aspect ratio to equal
+
+	c2 = axs[1].contourf(
+			(x - obst_x) / d,
+			(y - obst_y) / d,
+			np.abs(xi_),
+			contourp_2,
+			cmap=cm.cm.curl,
+			vmin=np.min(contourp_2),
+			vmax=np.max(contourp_2)
+	)
+	cbar2 = fig.colorbar(c2, ax=axs[1])
+	cbar2.formatter.set_powerlimits((-2, 2))  # Display colorbar tick labels in scientific notation
+	cbar2.update_ticks()
+
+	axs[1].fill(
+			obst_r * np.cos(np.arange(0, 2 * np.pi, 0.01)) / d,
+			obst_r * np.sin(np.arange(0, 2 * np.pi, 0.01)) / d,
+			"r"
+	)
+	axs[1].set_xlim([-2, np.max((x - obst_x) / d)])
 	T = f"Mode {power} (absolute value)"
-	plt.title(T, fontsize=16)
-	plt.box(True)
-	plt.data_aspect_ratio = [1, 1, 1]
-	plt.plot_box_aspect_ratio = [8.25, 2.25, 1]
-	plt.clim([np.min(contourp_2), np.max(contourp_2)])
-	# h.set_position([360.0000, 262.3333, 560.0000, 355.6667])
+	axs[1].set_title(T, fontsize=16)
+	axs[1].set_frame_on(True)  # Enable the frame around the subplot
+	axs[1].set_aspect('equal')  # Set the aspect ratio to equal
 
 	plt.tight_layout()
 	plt.show()
