@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import cmocean as cm
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -10,7 +9,7 @@ from tqdm import tqdm
 
 from rdp import logger
 from rdp.koopman import koop_pseudo_spec
-from rdp.utils.plotting import plot_pseudospectra, plot_eig_res, plot_error
+from rdp.utils.plotting import plot_pseudospectra, plot_eig_res, plot_error, plot_koop_mode
 
 from rdp.examples import load_cylinder_data, load_cylinder_dmd, load_cylinder_edmd
 
@@ -176,77 +175,6 @@ def gen_koop_modes(V, PSI_x, t1: int, D, powers: Iterable):
 	# x.shape -> 400, 100
 	# but for a meshgrid
 	# it should be meshgrid(arange(100) arange(400)) starting at 1 to 400
-
-
-def plot_koop_mode(
-		xi_: np.ndarray,
-		power: int,
-		contourp_1: np.ndarray,
-		contourp_2: np.ndarray,
-		obst_x: float,
-		obst_y: float,
-		obst_r: float,
-		x,
-		y,
-) -> None:
-	d = 2 * obst_r
-
-	# 	# Everything is normalized to the diameter
-	# 	# TODO: would that not perturb the AI, as real data cannot be normalised to the size of the obstacle
-	# 	# What if the data was normalized using a predicted size?
-	# 	# What if normalising the data to the size of the tidal turbine
-	fig, axs = plt.subplots(2, 1)
-
-	c1 = axs[0].contourf(
-		(x - obst_x) / d,
-		(y - obst_y) / d,
-		np.real(xi_),
-		contourp_1,
-		cmap=cm.cm.curl,
-		vmin=np.min(contourp_1),
-		vmax=np.max(contourp_1)
-	)
-	cbar1 = fig.colorbar(c1, ax=axs[0])
-	cbar1.formatter.set_powerlimits((-2, 2))  # Display colorbar tick labels in scientific notation
-	cbar1.update_ticks()
-
-	axs[0].fill(
-		obst_r * np.cos(np.arange(0, 2 * np.pi, 0.01)) / d,
-		obst_r * np.sin(np.arange(0, 2 * np.pi, 0.01)) / d,
-		"r"
-	)
-	axs[0].set_xlim([-2, np.max((x - obst_x) / d)])
-	T = f"Mode {power} (real part)"
-	axs[0].set_title(T, fontsize=16)
-	axs[0].set_frame_on(True)  # Enable the frame around the subplot
-	axs[0].set_aspect('equal')  # Set the aspect ratio to equal
-
-	c2 = axs[1].contourf(
-			(x - obst_x) / d,
-			(y - obst_y) / d,
-			np.abs(xi_),
-			contourp_2,
-			cmap=cm.cm.curl,
-			vmin=np.min(contourp_2),
-			vmax=np.max(contourp_2)
-	)
-	cbar2 = fig.colorbar(c2, ax=axs[1])
-	cbar2.formatter.set_powerlimits((-2, 2))  # Display colorbar tick labels in scientific notation
-	cbar2.update_ticks()
-
-	axs[1].fill(
-			obst_r * np.cos(np.arange(0, 2 * np.pi, 0.01)) / d,
-			obst_r * np.sin(np.arange(0, 2 * np.pi, 0.01)) / d,
-			"r"
-	)
-	axs[1].set_xlim([-2, np.max((x - obst_x) / d)])
-	T = f"Mode {power} (absolute value)"
-	axs[1].set_title(T, fontsize=16)
-	axs[1].set_frame_on(True)  # Enable the frame around the subplot
-	axs[1].set_aspect('equal')  # Set the aspect ratio to equal
-
-	plt.tight_layout()
-	plt.show()
 
 
 def save_xi(xi, powers, obst_x, obst_y, obst_r, xy: tuple):
