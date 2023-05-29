@@ -170,15 +170,19 @@ def gen_koop_modes(V, PSI_x, t1: int, D, powers: Iterable):
 		contour_2[i] = np.linspace(0, np.max(np.abs(xi_)), 21)
 
 		plot_koop_mode(xi_, power, contour_1[i], contour_2[i], obst_x, obst_y, obst_r, x, y)
-	# save_xi(xi, powers, obst_x, obst_y, obst_r, xy=x.shape)
+
+	# metadata = {
+	# 	"powers": powers,
+	# 	"obst_x": obst_x,
+	# 	"obst_y": obst_y,
+	# 	"obst_r": obst_r,
+	# 	"xy": x.shape,
+	# }
+	# save_xi(xi, metadata)
 
 	# x.shape -> 400, 100
 	# but for a meshgrid
 	# it should be meshgrid(arange(100) arange(400)) starting at 1 to 400
-
-
-def save_xi(xi, powers, obst_x, obst_y, obst_r, xy: tuple):
-	np.savez("test", xi=xi, powers=powers, obst_x=obst_x, obst_y=obst_y, obst_r=obst_r, xy=xy)
 
 
 def save_mode_png(xi_) -> None:
