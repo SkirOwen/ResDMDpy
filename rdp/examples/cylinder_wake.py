@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 
-from typing import Literal, Iterable
+from typing import Literal, Sized
 from tqdm import tqdm
 
 from rdp import logger
@@ -132,9 +132,10 @@ def main():
 	gen_koop_modes(V, PSI_x, t1, D, powers)
 
 
-def gen_koop_modes(V, PSI_x, t1: int, D, powers: Iterable):
+def gen_koop_modes(V, PSI_x, t1: int, D, powers: Sized):
 	# for ind2 it is the same as the one to perform the computation on the data file
 	# TODO make this either read from file or be defined before since I'll be using the raw data
+	# TODO: m1, m2, ind1, ind2 are stored in the mat file
 	m1 = 500
 	m2 = 1000
 	ind1 = np.arange(0, m1) + 6000    # slicing in matlab include the last item
