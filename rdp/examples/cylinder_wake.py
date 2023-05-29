@@ -152,8 +152,7 @@ def gen_koop_modes(V, PSI_x, t1: int, D, powers: Iterable):
 
 	# TODO: what does it mean to have a non-int power?
 	contour_1 = np.zeros((len(powers), 21))  # this works
-	contour_2 = np.zeros((len(powers) + 1, 21))
-	# contour_2 = [0] * (max(powers) + 1)            # This works
+	contour_2 = np.zeros((len(powers), 21))
 
 	xi = np.linalg.pinv(V) @ np.linalg.pinv(PSI_x) @ raw_data[:(raw_data.shape[0] // 2), ind2].T
 
