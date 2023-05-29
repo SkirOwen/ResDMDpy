@@ -151,6 +151,14 @@ def gen_koop_modes(V, PSI_x, t1: int, D, powers: Sized):
 	x = raw_file["x"]
 	y = raw_file["y"]
 
+	metadata = {
+		"powers": powers,
+		"obst_x": obst_x,
+		"obst_y": obst_y,
+		"obst_r": obst_r,
+		"xy": x.shape,
+	}
+
 	# TODO: what does it mean to have a non-int power?
 	contour_1 = np.zeros((len(powers), 21))  # this works
 	contour_2 = np.zeros((len(powers), 21))
@@ -171,13 +179,6 @@ def gen_koop_modes(V, PSI_x, t1: int, D, powers: Sized):
 
 		plot_koop_mode(xi_, power, contour_1[i], contour_2[i], obst_x, obst_y, obst_r, x, y)
 
-	# metadata = {
-	# 	"powers": powers,
-	# 	"obst_x": obst_x,
-	# 	"obst_y": obst_y,
-	# 	"obst_r": obst_r,
-	# 	"xy": x.shape,
-	# }
 	# save_xi(xi, metadata)
 
 	# x.shape -> 400, 100
