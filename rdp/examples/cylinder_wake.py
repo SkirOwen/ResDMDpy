@@ -194,6 +194,7 @@ def gen_koop_modes(
 
 
 def save_mode_png(xi_) -> None:
+	"""Save the xi of a koopman mode to a png"""
 	image_data = np.real(xi_.T)
 	# TODO: also do that for the abs
 
