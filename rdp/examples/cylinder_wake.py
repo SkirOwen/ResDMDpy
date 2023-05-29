@@ -157,7 +157,7 @@ def gen_koop_modes(V, PSI_x, t1: int, D, powers: Iterable):
 
 	xi = np.linalg.pinv(V) @ np.linalg.pinv(PSI_x) @ raw_data[:(raw_data.shape[0] // 2), ind2].T
 
-	for i, power in enumerate(tqdm(powers)):
+	for i, power in enumerate(tqdm(powers, desc="Calculating koopman modes")):
 		lambda_ = t1 ** power
 		idd = np.argmin(np.abs(D - lambda_))    # TODO: check this, seem good but return Number, and np.where an array
 		# TODO: matlab returns a Number
