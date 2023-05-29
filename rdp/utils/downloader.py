@@ -148,7 +148,7 @@ def url_download(url: str, path: str, task: int = 1, total: int = 1) -> None:
 	logger.debug(f"Downloaded in {path}")
 
 
-def downloader(urls: Iterable[str], root: str):
+def downloader(urls: Iterable[str], root: str, override: bool):
 	"""
 	Downloader to download multiple files.
 	"""
@@ -157,7 +157,13 @@ def downloader(urls: Iterable[str], root: str):
 		for task, url in enumerate(urls, start=1):
 			filename = url.split("/")[-1]
 			target_path = os.path.join(root, filename)
-			pool.submit(url_download, url, target_path, task, total=len(urls))
+
+			if not os.path.exists(target_path) or override:
+				# TODO: when file present it should only skip if checksum matches, if checksum_check is done
+				pool.submit(url_download, url, target_path, task, total=len(urls))
+			else:
+				logger.info(f"Skipping {filename} as already present in {root}")
+
 
 
 # future update:
