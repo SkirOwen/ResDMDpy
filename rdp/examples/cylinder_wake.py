@@ -132,7 +132,13 @@ def main():
 	gen_koop_modes(V, PSI_x, t1, D, powers)
 
 
-def gen_koop_modes(V, PSI_x, t1: int, D, powers: Sized):
+def gen_koop_modes(
+		V: np.ndarray,
+		PSI_x: np.ndarray,
+		t1: int,
+		D: np.ndarray,
+		powers: Sized
+) -> tuple:
 	# for ind2 it is the same as the one to perform the computation on the data file
 	# TODO make this either read from file or be defined before since I'll be using the raw data
 	# TODO: m1, m2, ind1, ind2 are stored in the mat file
@@ -184,6 +190,7 @@ def gen_koop_modes(V, PSI_x, t1: int, D, powers: Sized):
 	# x.shape -> 400, 100
 	# but for a meshgrid
 	# it should be meshgrid(arange(100) arange(400)) starting at 1 to 400
+	return xi, contour_1, contour_2, metadata
 
 
 def save_mode_png(xi_) -> None:
