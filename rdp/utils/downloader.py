@@ -148,7 +148,7 @@ def url_download(url: str, path: str, task: int = 1, total: int = 1) -> None:
 	logger.debug(f"Downloaded in {path}")
 
 
-def downloader(urls: Iterable[str], root: str, override: bool):
+def downloader(urls: Iterable[str], root: str, override: bool = False):
 	"""
 	Downloader to download multiple files.
 	"""
