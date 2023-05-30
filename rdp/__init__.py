@@ -9,3 +9,5 @@ logger: logging.Logger
 logger = make_logger(
 	level="INFO"
 )
+
+from .data.kernels import kernel_resdmd

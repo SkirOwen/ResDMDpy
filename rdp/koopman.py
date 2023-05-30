@@ -1,123 +1,125 @@
+from __future__ import annotations
+
 import numpy as np
 import scipy
 from scipy.sparse.linalg import eigs, lobpcg, eigsh
 from tqdm import tqdm
 from functools import partial
 import multiprocessing
+from multiprocessing.pool import ThreadPool
 
 
-# KoopPseudoSpec
+from rdp.utils.linalg_op import guarantee_hermitian
+from rdp import logger
 
 
-def compute_RES(jj, SQ, L, A, G, z_pts):
+def compute_RES(arr):
+	# return np.sqrt(np.real(eigs(arr, 1, which='SM')[0]))
 	return np.sqrt(
 		np.real(
-			eigs(
-				SQ @ (L - z_pts[jj] * A.T - np.conj(z_pts[jj]) * A + (abs(z_pts[jj])**2) * G) @ SQ,
-				1,
-				which='SM'
-			)[0]
+			scipy.linalg.eigvalsh(arr, subset_by_index=[0, 0])
 		)
 	)
 
 
-def koop_pseudo_spec(G, A, L, z_pts, parallel=False, z_pts2=None, reg_param=1e-14):
-	# %Collect the optional inputs
-	# p = inputParser;
+def koop_pseudo_spec(
+		G: np.ndarray,
+		A: np.ndarray,
+		L: np.ndarray,
+		z_pts: np.ndarray,
+		parallel: bool = False,
+		z_pts2: None | np.ndarray = None,
+		reg_param: float = 1e-14
+) -> tuple:
+	"""
 
-	# %addRequired(p, 'G', @ isnumeric);
-	# %addRequired(p, 'A', @ isnumeric);
-	# %addRequired(p, 'L', @ isnumeric);
-	# %addRequired(p, 'z_pts', @ isnumeric);
+	Parameters
+	----------
+	G : 2d-ndarray
+	A : 2d-ndarray
+	L : 2d-ndarray
+	z_pts : 1d-ndarray
+	parallel : bool, optional
+		The default is False
+	z_pts2 : ndarray, optional
+		The default is None.
+	reg_param : float, Optional
+		The default is 1e-14
 
-	# validPar = {'on', 'off'};
-	# checkPar = @(x) any(validatestring(x, validPar));
+	Returns
+	-------
+	tuple
 
-	# addParameter(p, 'Parallel', 'off', checkPar)
-	# addParameter(p, 'z_pts2', [], @ isnumeric)
-	# addParameter(p, 'reg_param', 10 ^ (-14), @ isnumeric)
+	"""
+	# safeguards
+	G = guarantee_hermitian(G)
+	L = guarantee_hermitian(L)
 
-	# p.CaseSensitive = false;
-	# parse(p, varargin{:})
-
-	# %%compute the pseudospectrum
-	# G = (G + G')/2; L=(L+L') / 2; %safeguards
-	G = (G + G.conj().T) / 2
-	L = (L + L.conj().T) / 2
 	# [VG, DG] = eig(G + norm(G) * (p.Results.reg_param) * eye(size(G)));
 	# MATLAB norm is by default 2, whereas for numpy is frobenius for matrices
 	DG, VG = np.linalg.eig(G + np.linalg.norm(G, 2) * reg_param * np.eye(*G.shape))
 
-	# DG(abs(DG) > 0) = sqrt(1. / abs(DG(abs(DG) > 0)));
-	# SQ = VG * DG * (VG'); % needed to compute pseudospectra according to Gram matrix G
-	# TODO: abs(DG[abs(DG)> 0]) sounds redundant
 	DG[abs(DG) > 0] = np.sqrt(1 / DG[abs(DG) > 0])  # TODO: this doesnt give the same results
-	SQ = VG @ (DG * np.identity(len(DG))) @ VG.conj().T
-	# TODO: DG * np.eye to make it diag, there must be a better way!
+	SQ = VG @ np.diag(DG) @ VG.conj().T
 
-	#
 	z_pts = z_pts.reshape(-1, 1)
 	LL = len(z_pts)
 	RES = np.zeros((LL, 1))
 	print(LL)
 
 	if LL > 0:
+		logger.info("Calculating matrix")
+		result = SQ @ (L - z_pts[:, np.newaxis] * A.conj().T - np.conj(z_pts[:, np.newaxis]) * A + (np.abs(z_pts[:, np.newaxis])**2) * G) @ SQ
+		logger.info("Done!")
 		if parallel:
 			with multiprocessing.Pool() as pool:
-				func = partial(compute_RES, SQ=SQ, L=L, A=A, G=G, z_pts=z_pts)
-				for idx, res in enumerate(tqdm(pool.imap(func, range(LL)), total=LL)):
+				for idx, res in enumerate(tqdm(pool.imap(compute_RES, result), total=LL)):
 					RES[idx] = res
-
 		else:
-			for jj in tqdm(range(LL)):
+			# RES = test(result, LL)
+			for jj in tqdm(range(LL), desc="Koopman pseudospectra"):
+				RES[jj] = compute_RES(result[jj])
 
-				# "smallestabs in matlab is SM in scipy and sm in Octave and Matlab<R2017a
-				RES[jj] = np.sqrt(
-					np.real(
-						eigs(   # TODO: look eigsh after fixing bottleneck
-							SQ @ (L - z_pts[jj] * A.conj().T - np.conj(z_pts[jj]) * A + (abs(z_pts[jj])**2) * G) @ SQ,
-							1,
-							which='SM')[0]
-					)
-				)
+			# "smallestabs in matlab is SM in scipy and sm in Octave and Matlab<R2017a
+			# RES[jj] = np.sqrt(
+			# 	np.real(
+			# 		eigs(   # TODO: look eigsh after fixing bottleneck
+			# 			SQ @ (L - z_pts[jj] * A.conj().T - np.conj(z_pts[jj]) * A + (abs(z_pts[jj])**2) * G) @ SQ,
+			# 			1,
+			# 			which='SM')[0]
+			# 	)
+			# )
 
 	RES2 = []
 	V2 = []
+
+	# if len(z_pts2):
+	# 	# TODO: do I really need this?
+	# 	RES2 = np.zeros((len(z_pts2), 1))
+	# 	V2 = np.zeros(G.shape[0], len(z_pts2))
 	#
-# 	if ~isempty(p.Results.z_pts2)
-# 		RES2=zeros(length(p.Results.z_pts2), 1);
-# 		V2=zeros(size(G, 1), length(p.Results.z_pts2));
-# 		pf = parfor_progress(length(p.Results.z_pts2));
-# 		pfcleanup = onCleanup( @ () delete(pf));
-# 		if p.Results.Parallel == "on"
-# 			parfor jj=1:length(p.Results.z_pts2)
-# 				warning('off', 'all')
-# 				[V, D] = eigs(
-# 					SQ * ((L) - p.Results.z_pts2(jj) * A'-conj(p.Results.z_pts2(jj))*A+(abs(p.Results.z_pts2(jj))^2)*G)*SQ,
-# 					1,
-# 					'smallestabs'
-# 				);
-# 				V2(:, jj) = V;
-# 				RES2(jj) = sqrt(real(D(1, 1)));
-# 				parfor_progress(pf);
-# 		end
-# 		else
-# 			for jj=1:length(p.Results.z_pts2)
-# 				[V, D] = eigs(
-# 					SQ * ((L) - p.Results.z_pts2(jj) * A'-conj(p.Results.z_pts2(jj))*A+(abs(p.Results.z_pts2(jj))^2)*G)*SQ,
-# 					1,
-# 					'smallestabs'
-# 				);
-# 				V2(:, jj) = V;
-# 				RES2(jj) = sqrt(real(D(1, 1)));
-# 				parfor_progress(pf);
-# 			end
-# 		end
-# 		V2 = SQ * V2;
-# 	end
-# 	#
-# 	warning('on', 'all')
-# 	#
+	# 	if parallel:
+	# 		for jj in range(len(z_pts2)):
+	# 			D, V = eigs(
+	# 				SQ @ (L - z_pts2[jj] * A.conj().T - np.conj(z_pts2[jj]) * A + (abs(z_pts2[jj])**2) * G) @ SQ,
+	# 				1,
+	# 				which="sn"
+	# 			)
+	#
+	# 			RES2[jj] = np.sqrt(np.real(D[0, 0]))
+	# 			V2[:, jj] = V.copy()
+	# 	else:
+	# 		for jj in range(len(z_pts2)):
+	# 			[V, D] = eigs(
+	# 				SQ @ (L - z_pts2[jj] * A.conj().T - np.conj(z_pts2[jj]) * A + (abs(z_pts2[jj])**2) * G) @ SQ,
+	# 				1,
+	# 				which="sm"
+	# 			)
+	# 			RES2[jj] = np.sqrt(np.real(D[0, 0]))
+	# 			V2[:, jj] = V.copy()
+	#
+	# 	V2 = SQ @ V2
+
 	return RES, RES2, V2
 #
 # # ErgodicMoments
@@ -141,10 +143,14 @@ def ergodic_moments(x: np.ndarray, n: int) -> np.ndarray:
 	"""
 	x = x.flatten()
 	m = len(x)
-	w = np.convolve(x, np.conj(np.flipud(x)))
+	mu = np.zeros(n + 1)
+	mu[0] = np.dot(x.conj().T, x) / (m * 2 * np.pi)
 
-	mu = np.zeros((1, n + 1))
-	mu[0] = np.dot(x) / (m * 2 * np.pi)
-	# TODO: WIP
+	w = np.convolve(x, np.conj(np.flip(x)))
+
+	mu[1: n+1] = w[m-2: n-1: -1].T / (2 * np.pi * np.arange(m-1, n, -1))
+	mu = np.concatenate((np.conj(np.flip(mu[1:])), mu))
+
+	return mu
 
 

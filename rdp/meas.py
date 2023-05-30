@@ -1,14 +1,26 @@
+from __future__ import annotations
+
 import numpy as np
+import scipy.linalg
 from scipy.sparse import issparse
 
 from utils.kernels import unitary_kernel
 from utils.filters import phi_inft, phi_opt4, phi_fejer, phi_cosine, phi_sharp_cosine
+from rdp.utils.linalg_op import guarantee_hermitian
 
 
 # IsomMeas
-def isom_meas(G: np.ndarray, A: np.ndarray, L, f, theta: np.ndarray, epsilon, order=2):
+def isom_meas(
+		G: np.ndarray,
+		A: np.ndarray,
+		L,
+		f: np.ndarray,
+		theta: np.ndarray,
+		epsilon: float,
+		order: int = 2
+) -> np.ndarray:
 
-	G = (G + G.conj().T) / 2
+	G = guarantee_hermitian(G)
 
 	# compute the poles and residues
 	delta = (2 * np.arange(1, order+1) / (order+1)-1) * 1j + 1
@@ -16,23 +28,33 @@ def isom_meas(G: np.ndarray, A: np.ndarray, L, f, theta: np.ndarray, epsilon, or
 
 	if issparse(A) and issparse(G):
 		v1 = G * f
-		v2 = v1.copy
+		v2 = v1.copy()
 		v3 = A.conj().T * f
-
-		nu = 0 * theta
-
-		# TODO: look at parallel here
-		for k in range(len(theta)):
-			for j in range(order):
-				lamb = np.exp(1j * theta[k]) * (1 + epsilon * delta[j])
-				Ij = np.linalg.solve((A - lamb * G), v1)
-				nu[k] = nu[k] - np.real(
-					1 / (2 * np.pi) * (c[j] * np.conj(lamb) * (Ij.H * v2) + d[j] * (v3.H * Ij))
-				)
 	else:
-		pass
+		# TODO: what is this test for?
+		if np.linalg.norm(G - np.eye(G.shape[0])) < (1e-14 * np.linalg.norm(G)):
+			q, s, _ = scipy.linalg.schur(A, output="complex")   # TODO: look into this schur not in __init__
+			z = q.copy()
+			t = scipy.sparse.eye(A.shape[0], format="csr")  # TODO: ditto
+		else:
+			s, t, q, z = scipy.linalg.qz(A, G)
+			q = q.conj().T  # TODO: what????????????????????????? why
 
+		v1 = t @ z.conj().T * f
+		v2 = t.conj().T @ q.conj().T * f
+		v3 = s.conj().T @ q.conj().T * f
 
+	nu = 0 * theta
+	# TODO: look at parallel here
+	for k in range(len(theta)):
+		for j in range(order):
+			lamb = np.exp(1j * theta[k]) * (1 + epsilon * delta[j])
+			Ij = np.linalg.solve((A - lamb @ G), v1)
+			nu[k] -= np.real(
+				1 / (2 * np.pi) * (c[j] * np.conj(lamb) * (Ij.conj().T @ v2) + d[j] * (v3.conj().T @ Ij))
+			)
+
+	return nu
 
 
 def moment_meas(mu: np.ndarray, filt: str = 'inft'):
@@ -41,7 +63,7 @@ def moment_meas(mu: np.ndarray, filt: str = 'inft'):
 	computed moments (Fourier coefficients). Requires chebfun.
 
 	Parameters:
-	MU (ndarray): Vector of Fourier coefficients (-N to N)
+	mu (ndarray): Vector of Fourier coefficients (-N to N)
 	filt (str): Type of filter (default: 'inft')
 
 	Returns:
