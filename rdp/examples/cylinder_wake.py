@@ -195,7 +195,7 @@ def gen_koop_modes(
 	return xi, contour_1, contour_2, metadata
 
 
-def save_mode_png(xi_) -> None:
+def save_mode_png(filename, xi_) -> None:
 	"""Save the xi of a koopman mode to a png"""
 	image_data = np.real(xi_.T)
 	# TODO: also do that for the abs
@@ -208,7 +208,7 @@ def save_mode_png(xi_) -> None:
 	image = Image.fromarray(normalized_data, mode="L")  # "L" mode represents grayscale images
 
 	# Save the image as a PNG file
-	image.save("data_image.png")
+	image.save(f"{filename}.png")
 
 
 if __name__ == "__main__":
