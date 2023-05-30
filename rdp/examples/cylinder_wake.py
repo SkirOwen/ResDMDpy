@@ -10,6 +10,7 @@ from tqdm import tqdm
 from rdp import logger
 from rdp.koopman import koop_pseudo_spec
 from rdp.utils.plotting import plot_pseudospectra, plot_eig_res, plot_error, plot_koop_mode
+from rdp.utils.file_ops import save_data
 
 from rdp.examples import load_cylinder_data, load_cylinder_dmd, load_cylinder_edmd
 
@@ -187,9 +188,11 @@ def gen_koop_modes(
 
 		plot_koop_mode(xi_, power, contour_1[i], contour_2[i], obst_x, obst_y, obst_r, x, y)
 
-	# save_xi(xi, metadata)
+	save_data("xi.h5", xi, metadata, backend="h5")
+	save_mode_png("xi_", xi_)
 
 	# x.shape -> 400, 100
+	# cause array are (y, x) in context of img
 	# but for a meshgrid
 	# it should be meshgrid(arange(100) arange(400)) starting at 1 to 400
 	return xi, contour_1, contour_2, metadata
