@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 
-from typing import Literal, Sized
+from typing import Literal, Sequence
 from tqdm import tqdm
 
 from rdp import logger
@@ -137,7 +137,7 @@ def gen_koop_modes(
 		PSI_x: np.ndarray,
 		t1: int,
 		D: np.ndarray,
-		powers: Sized
+		powers: Sequence,
 ) -> tuple:
 	# for ind2 it is the same as the one to perform the computation on the data file
 	# TODO make this either read from file or be defined before since I'll be using the raw data
