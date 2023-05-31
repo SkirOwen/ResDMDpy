@@ -69,8 +69,6 @@ def plot_error(lam1, ang1, res1):
 def plot_koop_mode(
 		xi_: np.ndarray,
 		power: int,
-		contourp_1: np.ndarray,
-		contourp_2: np.ndarray,
 		obst_x: float,
 		obst_y: float,
 		obst_r: float,
@@ -78,6 +76,9 @@ def plot_koop_mode(
 		y,
 ) -> None:
 	d = 2 * obst_r
+
+	contourp_1 = np.linspace(np.min(np.real(xi_)), np.max(np.real(xi_)), 21)
+	contourp_2 = np.linspace(0, np.max(np.abs(xi_)), 21)
 
 	# 	# Everything is normalized to the diameter
 	# 	# TODO: would that not perturb the AI, as real data cannot be normalised to the size of the obstacle

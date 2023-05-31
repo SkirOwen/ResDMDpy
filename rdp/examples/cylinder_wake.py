@@ -129,7 +129,7 @@ def main():
 	ang1[0], lam1[0], res1[0] = 0, 0, 0
 
 	plot_error(lam1, ang1, res1)
-	powers = [1, 2, 20]
+	powers = [1, 2, 3, 10, 15, 17, 18, 20]
 	gen_koop_modes(V, PSI_x, t1, D, powers)
 
 
@@ -167,8 +167,6 @@ def gen_koop_modes(
 	}
 
 	# TODO: what does it mean to have a non-int power?
-	contour_1 = np.zeros((len(powers), 21))  # this works
-	contour_2 = np.zeros((len(powers), 21))
 
 	# TODO: what is XI?
 	xi = np.linalg.pinv(V) @ np.linalg.pinv(PSI_x) @ raw_data[:(raw_data.shape[0] // 2), ind2].T
@@ -183,10 +181,7 @@ def gen_koop_modes(
 		xi_ = xi[idd, :]
 		xi_ = (-1j * xi_.reshape(100, 400) * tt).T
 
-		contour_1[i] = np.linspace(np.min(np.real(xi_)), np.max(np.real(xi_)), 21)
-		contour_2[i] = np.linspace(0, np.max(np.abs(xi_)), 21)
-
-		plot_koop_mode(xi_, power, contour_1[i], contour_2[i], obst_x, obst_y, obst_r, x, y)
+		plot_koop_mode(xi_, power, obst_x, obst_y, obst_r, x, y)
 
 	save_data("xi.h5", xi, metadata, backend="h5")
 	save_mode_png("xi_", xi_)
@@ -195,7 +190,7 @@ def gen_koop_modes(
 	# cause array are (y, x) in context of img
 	# but for a meshgrid
 	# it should be meshgrid(arange(100) arange(400)) starting at 1 to 400
-	return xi, contour_1, contour_2, metadata
+	return xi, metadata
 
 
 def save_mode_png(filename, xi_) -> None:
