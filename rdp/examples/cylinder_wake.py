@@ -60,80 +60,6 @@ def get_dict(dmd: Literal["linear", "combined", "pre-computed", "non-linear"]):
 	return G_matrix, A_matrix, L_matrix, N, PSI_x
 
 
-def main():
-	G_matrix, A_matrix, L_matrix, N, PSI_x = get_dict(dmd="non-linear")
-
-	x_pts = np.arange(-1.5, 1.55, 0.05)
-	y_pts = np.arange(-1.5, 1.55, 0.05)
-	X, Y = np.meshgrid(x_pts, y_pts)
-	z_pts = X + 1j * Y
-	z_pts = z_pts.flatten()
-
-	RES = koop_pseudo_spec(G_matrix, A_matrix, L_matrix, z_pts, parallel=False)[0]
-	RES = RES.reshape(len(y_pts), len(x_pts))
-
-	D, V = np.linalg.eig(np.linalg.inv(G_matrix) @ A_matrix)
-	# E = np.diag(D)
-
-	plot_pseudospectra(D, RES, X, Y, x_pts, y_pts)
-
-	# N = data["N"][0, 0]
-	RES2 = np.zeros(N)
-	for j in range(N):
-		M = L_matrix - D[j] * A_matrix.conj().T - D[j].conj() * A_matrix + np.abs(D[j]) ** 2 * G_matrix
-		num = np.sqrt(V[:, j].conj().T @ M @ V[:, j])
-		den = np.sqrt(V[:, j].conj().T @ G_matrix @ V[:, j])
-		RES2[j] = abs(num / den)
-
-	# I = np.argsort(RES2, axis=0)
-	I = np.argsort(RES2)
-	RES_p = RES2[I]
-	# RES_p = np.take_along_axis(RES2, I, axis=0)
-
-	plot_eig_res(D, RES2)
-
-	evec_x = PSI_x @ V[:, I]
-	lam = D[I]
-	t1 = 0.967585567481353 + 0.252543401421919j  # TODO: where does this come form?
-	t1 = lam[abs(lam - t1) == min(abs(lam - t1))]  # TODO: re centering so min(abs(lam-t1)) = 0
-	# TODO: what append if the equality has more than one output, t1 becomes longer than 1
-	# TODO: see np.argmin => this gives a number with more precison
-	# >>> lam[abs(lam - t1) == min(abs(lam - t1))]
-	# array([0.96758562+0.25254341j])
-	# >>> lam[np.argmin(abs(lam - t1))]
-	# (0.9675856210485554+0.2525434147325198j)   # type is numpy.complex128
-
-	lam1 = np.zeros(100)
-	ang1 = np.zeros(100)
-	res1 = np.zeros(100)
-
-	for j in range(100):
-		# find the indices of eigenvalues close to t1^j    (GPT???)
-		I2 = np.where(np.abs(lam - t1 ** (j + 1)) < 0.001)[0]
-		# TODO: max(0.001, 0) really useful, why is max(lam1) multiplied by 0 ?????
-		# TODO: look at np.nonzero
-
-		# check if only one eigenvalue was found
-		if len(I2) == 1:
-			# compute the error between the eigenspaces
-			b1 = evec_x[:, np.abs(lam - t1) < 0.001] ** (j + 1)
-			b2 = evec_x[:, I2]
-			# TODO: fix invalid value incountered in arccos
-			ang1[j] = np.arccos(np.abs(b1.conj().T @ b2 / (np.linalg.norm(b1, 2) * np.linalg.norm(b2, 2))))
-			# compute the error between the eigenvalues
-			lam1[j] = np.abs(lam[I2] - t1 ** (j + 1))
-			res1[j] = RES2[I[I2]]
-		else:
-			break  # TODO: why break the loop, why not continue?
-
-	ang1[0], lam1[0], res1[0] = 0, 0, 0
-
-	plot_error(lam1, ang1, res1)
-	# Energy L2 norm
-	powers = [1, 2, 3, 10, 15, 17, 18, 20]
-	gen_koop_modes(V, PSI_x, t1, D, powers)
-
-
 def gen_koop_modes(
 		V: np.ndarray,
 		PSI_x: np.ndarray,
@@ -210,6 +136,80 @@ def save_mode_png(filename, xi_) -> None:
 
 	# Save the image as a PNG file
 	image.save(f"{filename}.png")
+
+
+def main():
+	G_matrix, A_matrix, L_matrix, N, PSI_x = get_dict(dmd="non-linear")
+
+	x_pts = np.arange(-1.5, 1.55, 0.05)
+	y_pts = np.arange(-1.5, 1.55, 0.05)
+	X, Y = np.meshgrid(x_pts, y_pts)
+	z_pts = X + 1j * Y
+	z_pts = z_pts.flatten()
+
+	RES = koop_pseudo_spec(G_matrix, A_matrix, L_matrix, z_pts, parallel=False)[0]
+	RES = RES.reshape(len(y_pts), len(x_pts))
+
+	D, V = np.linalg.eig(np.linalg.inv(G_matrix) @ A_matrix)
+	# E = np.diag(D)
+
+	plot_pseudospectra(D, RES, X, Y, x_pts, y_pts)
+
+	# N = data["N"][0, 0]
+	RES2 = np.zeros(N)
+	for j in range(N):
+		M = L_matrix - D[j] * A_matrix.conj().T - D[j].conj() * A_matrix + np.abs(D[j]) ** 2 * G_matrix
+		num = np.sqrt(V[:, j].conj().T @ M @ V[:, j])
+		den = np.sqrt(V[:, j].conj().T @ G_matrix @ V[:, j])
+		RES2[j] = abs(num / den)
+
+	# I = np.argsort(RES2, axis=0)
+	I = np.argsort(RES2)
+	RES_p = RES2[I]
+	# RES_p = np.take_along_axis(RES2, I, axis=0)
+
+	plot_eig_res(D, RES2)
+
+	evec_x = PSI_x @ V[:, I]
+	lam = D[I]
+	t1 = 0.967585567481353 + 0.252543401421919j  # TODO: where does this come form?
+	t1 = lam[abs(lam - t1) == min(abs(lam - t1))]  # TODO: re centering so min(abs(lam-t1)) = 0
+	# TODO: what append if the equality has more than one output, t1 becomes longer than 1
+	# TODO: see np.argmin => this gives a number with more precison
+	# >>> lam[abs(lam - t1) == min(abs(lam - t1))]
+	# array([0.96758562+0.25254341j])
+	# >>> lam[np.argmin(abs(lam - t1))]
+	# (0.9675856210485554+0.2525434147325198j)   # type is numpy.complex128
+
+	lam1 = np.zeros(100)
+	ang1 = np.zeros(100)
+	res1 = np.zeros(100)
+
+	for j in range(100):
+		# find the indices of eigenvalues close to t1^j    (GPT???)
+		I2 = np.where(np.abs(lam - t1 ** (j + 1)) < 0.001)[0]
+		# TODO: max(0.001, 0) really useful, why is max(lam1) multiplied by 0 ?????
+		# TODO: look at np.nonzero
+
+		# check if only one eigenvalue was found
+		if len(I2) == 1:
+			# compute the error between the eigenspaces
+			b1 = evec_x[:, np.abs(lam - t1) < 0.001] ** (j + 1)
+			b2 = evec_x[:, I2]
+			# TODO: fix invalid value incountered in arccos
+			ang1[j] = np.arccos(np.abs(b1.conj().T @ b2 / (np.linalg.norm(b1, 2) * np.linalg.norm(b2, 2))))
+			# compute the error between the eigenvalues
+			lam1[j] = np.abs(lam[I2] - t1 ** (j + 1))
+			res1[j] = RES2[I[I2]]
+		else:
+			break  # TODO: why break the loop, why not continue?
+
+	ang1[0], lam1[0], res1[0] = 0, 0, 0
+
+	plot_error(lam1, ang1, res1)
+	# Energy L2 norm
+	powers = [1, 2, 3, 10, 15, 17, 18, 20]
+	gen_koop_modes(V, PSI_x, t1, D, powers)
 
 
 if __name__ == "__main__":
