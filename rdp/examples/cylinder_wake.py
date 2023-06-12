@@ -129,6 +129,7 @@ def main():
 	ang1[0], lam1[0], res1[0] = 0, 0, 0
 
 	plot_error(lam1, ang1, res1)
+	# Energy L2 norm
 	powers = [1, 2, 3, 10, 15, 17, 18, 20]
 	gen_koop_modes(V, PSI_x, t1, D, powers)
 
@@ -170,6 +171,7 @@ def gen_koop_modes(
 
 	# TODO: what is XI?
 	xi = np.linalg.pinv(V) @ np.linalg.pinv(PSI_x) @ raw_data[:(raw_data.shape[0] // 2), ind2].T
+	all_xi = []
 
 	for i, power in enumerate(tqdm(powers, desc="Calculating koopman modes")):
 		# TODO: make this a function
@@ -182,8 +184,9 @@ def gen_koop_modes(
 		xi_ = (-1j * xi_.reshape(100, 400) * tt).T
 
 		plot_koop_mode(xi_, power, obst_x, obst_y, obst_r, x, y)
+		all_xi.append(xi_)
 
-	save_data("xi.h5", xi, metadata, backend="h5")
+	save_data("xi_v2.h5", np.array(all_xi), metadata, backend="h5")
 	save_mode_png("xi_", xi_)
 
 	# x.shape -> 400, 100
