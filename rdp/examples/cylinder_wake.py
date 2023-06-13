@@ -112,7 +112,7 @@ def gen_koop_modes(
 		plot_koop_mode(xi_, power, obst_x, obst_y, obst_r, x, y)
 		all_xi.append(xi_)
 
-	save_data("xi_v2.h5", np.array(all_xi), metadata, backend="h5")
+	save_data("xi_v3_p.h5", np.array(all_xi), metadata, backend="h5")
 	save_mode_png("xi_", xi_)
 
 	# x.shape -> 400, 100
@@ -138,7 +138,7 @@ def save_mode_png(filename, xi_) -> None:
 	image.save(f"{filename}.png")
 
 
-def main():
+def run(powers: list):
 	G_matrix, A_matrix, L_matrix, N, PSI_x = get_dict(dmd="non-linear")
 
 	x_pts = np.arange(-1.5, 1.55, 0.05)
@@ -208,8 +208,13 @@ def main():
 
 	plot_error(lam1, ang1, res1)
 	# Energy L2 norm
-	powers = [1, 2, 3, 10, 15, 17, 18, 20]
+	powers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 17, 18, 20] if powers is None else powers
 	gen_koop_modes(V, PSI_x, t1, D, powers)
+
+
+def main():
+	powers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 17, 18, 20]
+	run(powers)
 
 
 if __name__ == "__main__":
