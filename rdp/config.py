@@ -16,10 +16,10 @@ def parse_args() -> Namespace:
 	parser = argparse.ArgumentParser()
 
 	parser.add_argument(
-		"-p", "--powers",
+		"-m", "--modes",
 		nargs="*",
 		type=int,
-		help="Powers to use for the koopman modes.",
+		help="Modes to use for the koopman modes.",
 	)
 
 	parser.add_argument(
@@ -30,6 +30,12 @@ def parse_args() -> Namespace:
 	parser.add_argument(
 		"-e", "--example",
 		help="Example to run. Currently only supports 'cylinder'.",
+	)
+
+	parser.add_argument(
+		"-p", "--plot-graph",
+		action="store_true",
+		help="Option to plot results.",
 	)
 
 	parser.add_argument(

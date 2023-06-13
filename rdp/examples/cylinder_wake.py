@@ -66,6 +66,7 @@ def gen_koop_modes(
 		t1: int,
 		D: np.ndarray,
 		powers: Sequence,
+		plot: bool = True,
 ) -> tuple:
 	# for ind2 it is the same as the one to perform the computation on the data file
 	# TODO make this either read from file or be defined before since I'll be using the raw data
@@ -109,7 +110,8 @@ def gen_koop_modes(
 		xi_ = xi[idd, :]
 		xi_ = (-1j * xi_.reshape(100, 400) * tt).T
 
-		plot_koop_mode(xi_, power, obst_x, obst_y, obst_r, x, y)
+		if plot:
+			plot_koop_mode(xi_, power, obst_x, obst_y, obst_r, x, y)
 		all_xi.append(xi_)
 
 	save_data("xi_v3_p.h5", np.array(all_xi), metadata, backend="h5")
@@ -138,7 +140,7 @@ def save_mode_png(filename, xi_) -> None:
 	image.save(f"{filename}.png")
 
 
-def run(powers: list):
+def run(powers: list, plot: bool = True):
 	G_matrix, A_matrix, L_matrix, N, PSI_x = get_dict(dmd="non-linear")
 
 	x_pts = np.arange(-1.5, 1.55, 0.05)
@@ -153,7 +155,8 @@ def run(powers: list):
 	D, V = np.linalg.eig(np.linalg.inv(G_matrix) @ A_matrix)
 	# E = np.diag(D)
 
-	plot_pseudospectra(D, RES, X, Y, x_pts, y_pts)
+	if plot:
+		plot_pseudospectra(D, RES, X, Y, x_pts, y_pts)
 
 	# N = data["N"][0, 0]
 	RES2 = np.zeros(N)
@@ -168,7 +171,8 @@ def run(powers: list):
 	RES_p = RES2[I]
 	# RES_p = np.take_along_axis(RES2, I, axis=0)
 
-	plot_eig_res(D, RES2)
+	if plot:
+		plot_eig_res(D, RES2)
 
 	evec_x = PSI_x @ V[:, I]
 	lam = D[I]
@@ -206,10 +210,12 @@ def run(powers: list):
 
 	ang1[0], lam1[0], res1[0] = 0, 0, 0
 
-	plot_error(lam1, ang1, res1)
+	if plot:
+		plot_error(lam1, ang1, res1)
 	# Energy L2 norm
 	powers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 17, 18, 20] if powers is None else powers
-	gen_koop_modes(V, PSI_x, t1, D, powers)
+
+	gen_koop_modes(V, PSI_x, t1, D, powers, plot)
 
 
 def main():
