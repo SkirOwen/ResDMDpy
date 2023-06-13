@@ -65,7 +65,7 @@ def koop_pseudo_spec(
 	z_pts = z_pts.reshape(-1, 1)
 	LL = len(z_pts)
 	RES = np.zeros((LL, 1))
-	print(LL)
+	logger.debug(f"{LL} points to calculate")
 
 	if LL > 0:
 		logger.info("Calculating matrix")
