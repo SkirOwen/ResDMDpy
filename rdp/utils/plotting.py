@@ -74,6 +74,7 @@ def plot_koop_mode(
 		obst_r: float,
 		x,
 		y,
+		cmap=cm.cm.ice,
 ) -> None:
 	d = 2 * obst_r
 
@@ -91,7 +92,7 @@ def plot_koop_mode(
 		(y - obst_y) / d,
 		np.real(xi_),
 		contourp_1,
-		cmap=cm.cm.curl,
+		cmap=cmap,
 		vmin=np.min(contourp_1),
 		vmax=np.max(contourp_1)
 	)
@@ -115,7 +116,7 @@ def plot_koop_mode(
 			(y - obst_y) / d,
 			np.abs(xi_),
 			contourp_2,
-			cmap=cm.cm.curl,
+			cmap=cmap,
 			vmin=np.min(contourp_2),
 			vmax=np.max(contourp_2)
 	)
