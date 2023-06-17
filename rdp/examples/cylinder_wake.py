@@ -76,7 +76,7 @@ def gen_koop_modes(
 	ind1 = np.arange(0, m1) + 6000    # slicing in matlab include the last item
 	ind2 = np.arange(0, m2) + (m1 + 6000) + 500
 
-	logger.info("Loading raw data ..")
+	logger.info("Loading raw data ...")
 	raw_file = load_cylinder_data()
 	logger.info("Done!")
 	raw_data = raw_file["DATA"]
@@ -219,7 +219,7 @@ def run(powers: list, plot: bool = True):
 
 
 def main():
-	powers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 17, 18, 20]
+	powers = [1, 2, 3, 4]
 	run(powers)
 
 
