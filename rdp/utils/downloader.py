@@ -159,6 +159,7 @@ def downloader(urls: Sequence[str], root: str, override: bool = False):
 		root = os.path.abspath(root)
 		for task, url in enumerate(urls, start=1):
 			filename = url.split("/")[-1]
+			filename = filename.split("?")[0]   # Removing HTML tag/option
 			target_path = os.path.join(root, filename)
 
 			if not os.path.exists(target_path) or override:
