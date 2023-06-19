@@ -152,7 +152,9 @@ def downloader(urls: Sequence[str], root: str, override: bool = False):
 	"""
 	Downloader to download multiple files.
 	"""
-	# TODO: what is the combination of Iterable[str] and Sized
+	if isinstance(urls, str):
+		urls = [urls]
+
 	with ThreadPoolExecutor(max_workers=4) as pool:
 		root = os.path.abspath(root)
 		for task, url in enumerate(urls, start=1):
