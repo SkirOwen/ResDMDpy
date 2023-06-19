@@ -39,6 +39,7 @@ def get_url(filename: str) -> Iterable:
 	logger.info(f"Attempting to find a URL for the file.")
 	try:
 		url = DL_URL[filename]
+		logger.info("URL found.")
 	except KeyError:
 		raise ValueError(f"No known URL to download {filename}.")
 	return [url]
