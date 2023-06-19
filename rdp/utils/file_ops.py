@@ -29,7 +29,7 @@ def guarantee_existence(path: str) -> str:
 
 
 def guarantee_file_dl(filepath: str, url: None | list = None) -> None:
-	# TODO: handle if url is not list???
+	"""Try to download a file, if not present, given a URL, if none then use a look-up table."""
 	# TODO: checksum
 	directory = os.path.dirname(filepath)
 	filename = os.path.basename(filepath)

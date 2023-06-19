@@ -49,6 +49,7 @@ DL_URL = {
 
 
 def get_url(filename: str) -> list:
+	"""Get the url associated with the filename in DL_URL."""
 	logger.info(f"Attempting to find a URL for the file.")
 	try:
 		url = DL_URL[filename]
