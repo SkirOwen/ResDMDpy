@@ -45,30 +45,6 @@ def get_url(filename: str) -> list:
 	return [url]
 
 
-# def _credential_helper(base_url: str) -> tuple[str, str]:
-# 	"""Getting credentials from a file, and generating them if it does not exist"""
-#
-# 	credential_path = os.path.join(get_data_dir(), "credentials.json")
-# 	cred = {}
-#
-# 	if os.path.exists(credential_path):
-# 		with open(credential_path, "r") as f:
-# 			cred = json.load(f)
-#
-# 	if base_url not in cred:
-# 		print(f"Credential for {base_url}")
-# 		username = str(input("Username: "))
-# 		password = str(input("Password: "))
-# 		cred[base_url] = {"username": username, "password": password}
-# 		with open(credential_path, "w") as f:
-# 			json.dump(cred, f)
-# 	else:
-# 		username = cred[base_url]["username"]
-# 		password = cred[base_url]["password"]
-#
-# 	return username, password
-
-
 def _get_response_size(resp: HTTPResponse) -> None | int:
 	"""
 	Get the size of the file to download
