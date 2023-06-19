@@ -35,7 +35,7 @@ DL_URL = {
 }
 
 
-def get_url(filename: str) -> Iterable:
+def get_url(filename: str) -> list:
 	logger.info(f"Attempting to find a URL for the file.")
 	try:
 		url = DL_URL[filename]
