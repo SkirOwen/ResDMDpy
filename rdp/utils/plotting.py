@@ -5,8 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import pyplot as plt
 
-# import cmocean as cm
-
 
 def plot_pseudospectra(D, RES, X, Y, x_pts, y_pts):
 	# TODO: fix the following plot code
@@ -69,15 +67,18 @@ def plot_error(lam1, ang1, res1):
 def plot_koop_mode(
 		xi_: np.ndarray,
 		power: int,
-		contourp_1: np.ndarray,
-		contourp_2: np.ndarray,
 		obst_x: float,
 		obst_y: float,
 		obst_r: float,
 		x,
 		y,
+		cmap=cm.cm.ice,
+		filename: None | str = None,
 ) -> None:
 	d = 2 * obst_r
+
+	contourp_1 = np.linspace(np.min(np.real(xi_)), np.max(np.real(xi_)), 21)
+	contourp_2 = np.linspace(0, np.max(np.abs(xi_)), 21)
 
 	# 	# Everything is normalized to the diameter
 	# 	# TODO: would that not perturb the AI, as real data cannot be normalised to the size of the obstacle
@@ -90,7 +91,7 @@ def plot_koop_mode(
 		(y - obst_y) / d,
 		np.real(xi_),
 		contourp_1,
-		cmap=cm.cm.curl,
+		cmap=cmap,
 		vmin=np.min(contourp_1),
 		vmax=np.max(contourp_1)
 	)
@@ -114,7 +115,7 @@ def plot_koop_mode(
 			(y - obst_y) / d,
 			np.abs(xi_),
 			contourp_2,
-			cmap=cm.cm.curl,
+			cmap=cmap,
 			vmin=np.min(contourp_2),
 			vmax=np.max(contourp_2)
 	)
@@ -134,4 +135,7 @@ def plot_koop_mode(
 	axs[1].set_aspect('equal')  # Set the aspect ratio to equal
 
 	plt.tight_layout()
+
+	if filename is not None:
+		plt.savefig(filename, dpi=200)
 	plt.show()

@@ -11,7 +11,7 @@ from http.client import HTTPResponse
 # from threading import Event
 from tqdm.auto import tqdm
 
-from typing import Iterable, Generator
+from typing import Iterable, Generator, Sequence
 
 from rdp import logger
 
@@ -19,53 +19,44 @@ CHUNK_SIZE = 1024
 
 
 DL_URL = {
-	"Cylinder_data.mat": "",
-	"Cylinder_DMD.mat": "",
-	"Cylinder_EDMD.mat": "",
-	"dataset_1s_b.mat": "",
-	"dataset_1s.mat": "",
-	"double_pendulum_data.mat": "",
-	"EDMD_canopy_final.mat": "",
-	"HotWireData_Baseline.mat": "",
-	"HotWireData_FlowInjection.mat": "",
-	"LIP_times.mat": "",
-	"LIP.mat": "",
-	"mpEDMD_turbulent_data.mat": "",
-	"pendulum_data.m`at": "",
+	"Cylinder_data.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AABtaOxacC1EItJFzG9vYhLea/Cylinder_data.mat?dl=1",
+	"Cylinder_DMD.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AACyLjjLdVyMw6BwsyGq7Mgfa/Cylinder_DMD.mat?dl=1",
+	"Cylinder_EDMD.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AABO3_sxgRUoNPqn3aNBuS9ja/Cylinder_EDMD.mat?dl=1",
+	"dataset_1s_b.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AABtry5mJ9w6vA5mvaegiyaRa/dataset_1s_b.mat?dl=1",
+	"dataset_1s.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AACgntn4e2qeABmlHwJoPBRZa/dataset_1s.mat?dl=1",
+	"double_pendulum_data.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AADeq2WTwWJmldK4MmoHcpJBa/double_pendulum_data.mat?dl=1",
+	"EDMD_canopy_final.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AADeX7bEunC_0js-5W3OxBTia/EDMD_canopy_final.mat?dl=1",
+	"HotWireData_Baseline.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AAAx2tooaBzVb_w39lauGm_Na/HotWireData_Baseline.mat?dl=1",
+	"HotWireData_FlowInjection.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AAD3CeiHywHyLFEKU6QDIDPKa/HotWireData_FlowInjection.mat?dl=1",
+	"LIP_times.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AACwZFKE9Q_m0PsJuX57qdnIa/LIP_times.mat?dl=1",
+	"LIP.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AAAYN6mbi67camTnVaFG2Xqpa/LIP.mat?dl=1",
+	"mpEDMD_turbulent_data.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AABKFTJse32Kchpc9fHltr_4a/mpEDMD_turbulent_data.mat?dl=1",
+	"pendulum_data.m`at":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AADzDOvQ9gc-3BC7xkx45rHCa/pendulum_data.mat?dl=1",
 }
 
 
-def get_url(filename: str) -> Iterable:
+def get_url(filename: str) -> list:
+	"""Get the url associated with the filename in DL_URL."""
 	logger.info(f"Attempting to find a URL for the file.")
 	try:
 		url = DL_URL[filename]
+		logger.info("URL found.")
 	except KeyError:
 		raise ValueError(f"No known URL to download {filename}.")
 	return [url]
-
-
-# def _credential_helper(base_url: str) -> tuple[str, str]:
-# 	"""Getting credentials from a file, and generating them if it does not exist"""
-#
-# 	credential_path = os.path.join(get_data_dir(), "credentials.json")
-# 	cred = {}
-#
-# 	if os.path.exists(credential_path):
-# 		with open(credential_path, "r") as f:
-# 			cred = json.load(f)
-#
-# 	if base_url not in cred:
-# 		print(f"Credential for {base_url}")
-# 		username = str(input("Username: "))
-# 		password = str(input("Password: "))
-# 		cred[base_url] = {"username": username, "password": password}
-# 		with open(credential_path, "w") as f:
-# 			json.dump(cred, f)
-# 	else:
-# 		username = cred[base_url]["username"]
-# 		password = cred[base_url]["password"]
-#
-# 	return username, password
 
 
 def _get_response_size(resp: HTTPResponse) -> None | int:
@@ -148,15 +139,18 @@ def url_download(url: str, path: str, task: int = 1, total: int = 1) -> None:
 	logger.debug(f"Downloaded in {path}")
 
 
-def downloader(urls: Iterable[str], root: str, override: bool):
+def downloader(urls: Sequence[str], root: str, override: bool = False):
 	"""
 	Downloader to download multiple files.
 	"""
-	# TODO: what is the combination of Iterable[str] and Sized
+	if isinstance(urls, str):
+		urls = [urls]
+
 	with ThreadPoolExecutor(max_workers=4) as pool:
 		root = os.path.abspath(root)
 		for task, url in enumerate(urls, start=1):
 			filename = url.split("/")[-1]
+			filename = filename.split("?")[0]   # Removing HTML tag/option
 			target_path = os.path.join(root, filename)
 
 			if not os.path.exists(target_path) or override:

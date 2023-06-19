@@ -32,6 +32,7 @@ def koop_pseudo_spec(
 		reg_param: float = 1e-14
 ) -> tuple:
 	"""
+	Compute the koopman pseudo-spectra.
 
 	Parameters
 	----------
@@ -40,11 +41,11 @@ def koop_pseudo_spec(
 	L : 2d-ndarray
 	z_pts : 1d-ndarray
 	parallel : bool, optional
-		The default is False
+		The default is False.
 	z_pts2 : ndarray, optional
 		The default is None.
 	reg_param : float, Optional
-		The default is 1e-14
+		The default is 1e-14.
 
 	Returns
 	-------
@@ -65,7 +66,7 @@ def koop_pseudo_spec(
 	z_pts = z_pts.reshape(-1, 1)
 	LL = len(z_pts)
 	RES = np.zeros((LL, 1))
-	print(LL)
+	logger.debug(f"{LL} points to calculate")
 
 	if LL > 0:
 		logger.info("Calculating matrix")
@@ -76,19 +77,8 @@ def koop_pseudo_spec(
 				for idx, res in enumerate(tqdm(pool.imap(compute_RES, result), total=LL)):
 					RES[idx] = res
 		else:
-			# RES = test(result, LL)
 			for jj in tqdm(range(LL), desc="Koopman pseudospectra"):
 				RES[jj] = compute_RES(result[jj])
-
-			# "smallestabs in matlab is SM in scipy and sm in Octave and Matlab<R2017a
-			# RES[jj] = np.sqrt(
-			# 	np.real(
-			# 		eigs(   # TODO: look eigsh after fixing bottleneck
-			# 			SQ @ (L - z_pts[jj] * A.conj().T - np.conj(z_pts[jj]) * A + (abs(z_pts[jj])**2) * G) @ SQ,
-			# 			1,
-			# 			which='SM')[0]
-			# 	)
-			# )
 
 	RES2 = []
 	V2 = []
@@ -121,8 +111,6 @@ def koop_pseudo_spec(
 	# 	V2 = SQ @ V2
 
 	return RES, RES2, V2
-#
-# # ErgodicMoments
 
 
 def ergodic_moments(x: np.ndarray, n: int) -> np.ndarray:
