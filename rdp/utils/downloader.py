@@ -11,7 +11,7 @@ from http.client import HTTPResponse
 # from threading import Event
 from tqdm.auto import tqdm
 
-from typing import Iterable, Generator
+from typing import Iterable, Generator, Sequence
 
 from rdp import logger
 
@@ -148,7 +148,7 @@ def url_download(url: str, path: str, task: int = 1, total: int = 1) -> None:
 	logger.debug(f"Downloaded in {path}")
 
 
-def downloader(urls: Iterable[str], root: str, override: bool = False):
+def downloader(urls: Sequence[str], root: str, override: bool = False):
 	"""
 	Downloader to download multiple files.
 	"""
