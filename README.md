@@ -3,7 +3,7 @@
 ![Static Badge](https://img.shields.io/badge/python->3.11-blue?logo=python)
 ![GitHub](https://img.shields.io/github/license/SkirOwen/ResDMDpy)
 
-**DISCLAIMER: This an early version and not everything as been ported to python**
+**DISCLAIMER: This an early version and not everything has been ported to python**
 
 This is a `python` translation of https://github.com/MColbrook/Measure-preserving-Extended-Dynamic-Mode-Decomposition.
 
