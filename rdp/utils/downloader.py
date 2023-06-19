@@ -19,19 +19,32 @@ CHUNK_SIZE = 1024
 
 
 DL_URL = {
-	"Cylinder_data.mat": "",
-	"Cylinder_DMD.mat": "",
-	"Cylinder_EDMD.mat": "",
-	"dataset_1s_b.mat": "",
-	"dataset_1s.mat": "",
-	"double_pendulum_data.mat": "",
-	"EDMD_canopy_final.mat": "",
-	"HotWireData_Baseline.mat": "",
-	"HotWireData_FlowInjection.mat": "",
-	"LIP_times.mat": "",
-	"LIP.mat": "",
-	"mpEDMD_turbulent_data.mat": "",
-	"pendulum_data.m`at": "",
+	"Cylinder_data.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AABtaOxacC1EItJFzG9vYhLea/Cylinder_data.mat?dl=1",
+	"Cylinder_DMD.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AACyLjjLdVyMw6BwsyGq7Mgfa/Cylinder_DMD.mat?dl=1",
+	"Cylinder_EDMD.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AABO3_sxgRUoNPqn3aNBuS9ja/Cylinder_EDMD.mat?dl=1",
+	"dataset_1s_b.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AABtry5mJ9w6vA5mvaegiyaRa/dataset_1s_b.mat?dl=1",
+	"dataset_1s.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AACgntn4e2qeABmlHwJoPBRZa/dataset_1s.mat?dl=1",
+	"double_pendulum_data.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AADeq2WTwWJmldK4MmoHcpJBa/double_pendulum_data.mat?dl=1",
+	"EDMD_canopy_final.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AADeX7bEunC_0js-5W3OxBTia/EDMD_canopy_final.mat?dl=1",
+	"HotWireData_Baseline.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AAAx2tooaBzVb_w39lauGm_Na/HotWireData_Baseline.mat?dl=1",
+	"HotWireData_FlowInjection.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AAD3CeiHywHyLFEKU6QDIDPKa/HotWireData_FlowInjection.mat?dl=1",
+	"LIP_times.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AACwZFKE9Q_m0PsJuX57qdnIa/LIP_times.mat?dl=1",
+	"LIP.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AAAYN6mbi67camTnVaFG2Xqpa/LIP.mat?dl=1",
+	"mpEDMD_turbulent_data.mat":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AABKFTJse32Kchpc9fHltr_4a/mpEDMD_turbulent_data.mat?dl=1",
+	"pendulum_data.m`at":
+		"https://www.dropbox.com/sh/xj59e5in7dfsobi/AADzDOvQ9gc-3BC7xkx45rHCa/pendulum_data.mat?dl=1",
 }
 
 
