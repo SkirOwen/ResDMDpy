@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -11,11 +12,11 @@ from rdp import logger
 from rdp.koopman import koop_pseudo_spec
 from rdp.utils.plotting import plot_pseudospectra, plot_eig_res, plot_error, plot_koop_mode
 from rdp.utils.file_ops import save_data
+from rdp.utils.directories import get_koopmode_dir
 
 from rdp.examples import load_cylinder_data, load_cylinder_dmd, load_cylinder_edmd
 
 plt.rcParams['text.usetex'] = True
-
 
 def get_dict(dmd: Literal["linear", "combined", "pre-computed", "non-linear"]):
 	if dmd == "linear":
@@ -67,6 +68,7 @@ def gen_koop_modes(
 		D: np.ndarray,
 		powers: Sequence,
 		plot: bool = True,
+		filename: str = "cylinder_xi_v3_p.h5",
 ) -> tuple:
 	# for ind2 it is the same as the one to perform the computation on the data file
 	# TODO make this either read from file or be defined before since I'll be using the raw data
@@ -114,7 +116,12 @@ def gen_koop_modes(
 			plot_koop_mode(xi_, power, obst_x, obst_y, obst_r, x, y)
 		all_xi.append(xi_)
 
-	save_data("xi_v3_p.h5", np.array(all_xi), metadata, backend="h5")
+	save_data(
+		os.path.join(get_koopmode_dir(), filename),
+		np.array(all_xi),
+		metadata,
+		backend="h5"
+	)
 	save_mode_png("xi_", xi_)
 
 	# x.shape -> 400, 100
@@ -140,7 +147,7 @@ def save_mode_png(filename, xi_) -> None:
 	image.save(f"{filename}.png")
 
 
-def run(powers: list, plot: bool = True):
+def run(powers: list, plot: bool = True, filename: str = "cylinder_xi_v3_p.h5"):
 	G_matrix, A_matrix, L_matrix, N, PSI_x = get_dict(dmd="non-linear")
 
 	x_pts = np.arange(-1.5, 1.55, 0.05)
@@ -215,12 +222,12 @@ def run(powers: list, plot: bool = True):
 	# Energy L2 norm
 	powers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 17, 18, 20] if powers is None else powers
 
-	gen_koop_modes(V, PSI_x, t1, D, powers, plot)
+	gen_koop_modes(V, PSI_x, t1, D, powers, plot, filename)
 
 
 def main():
-	powers = [1, 2, 3, 4]
-	run(powers)
+	powers = [i for i in range(1, 51)]
+	run(powers, plot=False, filename="cylinder_xi_1_50.h5")
 
 
 if __name__ == "__main__":
