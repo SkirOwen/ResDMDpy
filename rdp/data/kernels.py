@@ -59,6 +59,7 @@ def kernel_resdmd(
 	# TODO: something to do with ma here
 	sig = np.sqrt(np.diag(d0))
 	sig_dag = np.zeros(sig.shape)
+	# ComplexWarning: Casting complex values to real discards the imaginary part
 	sig_dag[sig > 0] = 1 / sig[sig > 0]
 
 	k_hat = sig_dag @ u.conj().T @ a1 @ u @ sig_dag

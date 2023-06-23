@@ -5,8 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import pyplot as plt
 
-# import cmocean as cm
-
 
 def plot_pseudospectra(D, RES, X, Y, x_pts, y_pts):
 	# TODO: fix the following plot code
@@ -74,6 +72,8 @@ def plot_koop_mode(
 		obst_r: float,
 		x,
 		y,
+		cmap=cm.cm.ice,
+		filename: None | str = None,
 ) -> None:
 	d = 2 * obst_r
 
@@ -91,7 +91,7 @@ def plot_koop_mode(
 		(y - obst_y) / d,
 		np.real(xi_),
 		contourp_1,
-		cmap=cm.cm.curl,
+		cmap=cmap,
 		vmin=np.min(contourp_1),
 		vmax=np.max(contourp_1)
 	)
@@ -115,7 +115,7 @@ def plot_koop_mode(
 			(y - obst_y) / d,
 			np.abs(xi_),
 			contourp_2,
-			cmap=cm.cm.curl,
+			cmap=cmap,
 			vmin=np.min(contourp_2),
 			vmax=np.max(contourp_2)
 	)
@@ -135,4 +135,7 @@ def plot_koop_mode(
 	axs[1].set_aspect('equal')  # Set the aspect ratio to equal
 
 	plt.tight_layout()
+
+	if filename is not None:
+		plt.savefig(filename, dpi=200)
 	plt.show()

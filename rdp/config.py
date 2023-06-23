@@ -27,6 +27,12 @@ def parse_args() -> Namespace:
 		help="Name of any output file for this run. The location and file extension will be handled."
 	)
 
+	# parser.add_argument(
+	# 	"--output-dir",
+	# 	default="output",
+	# 	help="Path of specific output directory. The default is `./output`."
+	# )
+
 	parser.add_argument(
 		"-e", "--example",
 		help="Example to run. Currently only supports 'cylinder'.",

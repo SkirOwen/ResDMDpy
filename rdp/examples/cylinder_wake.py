@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -11,8 +12,12 @@ from rdp import logger
 from rdp.koopman import koop_pseudo_spec
 from rdp.utils.plotting import plot_pseudospectra, plot_eig_res, plot_error, plot_koop_mode
 from rdp.utils.file_ops import save_data
+from rdp.utils.directories import get_koopmode_dir
 
 from rdp.examples import load_cylinder_data, load_cylinder_dmd, load_cylinder_edmd
+
+from rdp.utils.directories import get_example_dir
+from rdp.data.basis_func import gen_from_file
 
 plt.rcParams['text.usetex'] = True
 
@@ -49,6 +54,19 @@ def get_dict(dmd: Literal["linear", "combined", "pre-computed", "non-linear"]):
 		A_matrix = (PSI_x.conj().T @ PSI_y) / data_edmd["M2"]
 		L_matrix = (PSI_y.conj().T @ PSI_y) / data_edmd["M2"]
 
+	elif dmd == "generate":
+		# data_raw = load_cylinder_data()
+		filepath = os.path.join(get_example_dir(), "Cylinder_data.mat")
+		N = 200
+		M1 = 500
+		M2 = 1000
+		dmd = 1
+		PSI_x, PSI_y = gen_from_file(filepath, n=N, m1=M1, m2=M2, use_dmd=dmd)
+
+		G_matrix = (PSI_x.conj().T @ PSI_x) / M2
+		A_matrix = (PSI_x.conj().T @ PSI_y) / M2
+		L_matrix = (PSI_y.conj().T @ PSI_y) / M2
+
 	else:   # pre-computed
 		data = load_cylinder_edmd()
 		G_matrix = data["G_matrix"]
@@ -67,6 +85,7 @@ def gen_koop_modes(
 		D: np.ndarray,
 		powers: Sequence,
 		plot: bool = True,
+		filename: str = "cylinder_xi_v3_p.h5",
 ) -> tuple:
 	# for ind2 it is the same as the one to perform the computation on the data file
 	# TODO make this either read from file or be defined before since I'll be using the raw data
@@ -76,7 +95,7 @@ def gen_koop_modes(
 	ind1 = np.arange(0, m1) + 6000    # slicing in matlab include the last item
 	ind2 = np.arange(0, m2) + (m1 + 6000) + 500
 
-	logger.info("Loading raw data ..")
+	logger.info("Loading raw data ...")
 	raw_file = load_cylinder_data()
 	logger.info("Done!")
 	raw_data = raw_file["DATA"]
@@ -115,7 +134,12 @@ def gen_koop_modes(
 			plot_koop_mode(xi_, power, obst_x, obst_y, obst_r, x, y)
 		all_xi.append(xi_)
 
-	save_data("xi_v3_p.h5", np.array(all_xi), metadata, backend="h5")
+	save_data(
+		os.path.join(get_koopmode_dir(), filename),
+		np.array(all_xi),
+		metadata,
+		backend="h5"
+	)
 	save_mode_png("xi_", xi_)
 
 	# x.shape -> 400, 100
@@ -141,7 +165,7 @@ def save_mode_png(filename, xi_) -> None:
 	image.save(f"{filename}.png")
 
 
-def run(powers: list, plot: bool = True):
+def run(powers: list, plot: bool = True, filename: str = "cylinder_xi_v3_p.h5"):
 	G_matrix, A_matrix, L_matrix, N, PSI_x = get_dict(dmd="non-linear")
 
 	x_pts = np.arange(-1.5, 1.55, 0.05)
@@ -216,12 +240,12 @@ def run(powers: list, plot: bool = True):
 	# Energy L2 norm
 	powers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 17, 18, 20] if powers is None else powers
 
-	gen_koop_modes(V, PSI_x, t1, D, powers, plot)
+	gen_koop_modes(V, PSI_x, t1, D, powers, plot, filename)
 
 
 def main():
-	powers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 17, 18, 20]
-	run(powers)
+	powers = [i for i in range(1, 51)]
+	run(powers, plot=False, filename="cylinder_xi_1_50.h5")
 
 
 if __name__ == "__main__":

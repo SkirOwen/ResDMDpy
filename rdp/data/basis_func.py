@@ -2,6 +2,7 @@ import numpy as np
 import scipy
 
 from rdp import kernel_resdmd
+from rdp.utils.mat_loader import loadmat
 
 
 def gen_from_file(
@@ -12,13 +13,14 @@ def gen_from_file(
 		use_dmd: int = 1,  # TODO: change this to a bool maybe
 ) -> tuple[np.ndarray, np.ndarray]:
 	""""""
-	data = scipy.io.loadmat(filepath)
+	data = loadmat(filepath)
 	ind1 = np.arange(0, m1) + 6000    # slicing in matlab include the last item
 	ind2 = np.arange(0, m2) + (m1 + 6000) + 500
 	# TODO: this slicing returns the right thing, but I think there is a nicer way
 	# I had to do a +1 for ind2
 
 	if use_dmd == 1:
+		# Linear dictionary
 		_, s, vh = np.linalg.svd(data["DATA"][:, ind1].T / np.sqrt(m1), full_matrices=False)
 		# TODO: during the svd, at least two columns of vh (2, and 4) have their sign flipped compare to matlab
 		# the vh returned by svd is the hermitian of the v in matlab
