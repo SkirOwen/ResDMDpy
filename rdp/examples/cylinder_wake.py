@@ -105,6 +105,7 @@ def gen_koop_modes(
 		lambda_ = t1 ** power
 		idd = np.argmin(np.abs(D - lambda_))    # TODO: check this, seem good but return Number, and np.where an array
 		# TODO: matlab returns a Number
+		# eigval = D[idd]
 		tt = np.linalg.norm(PSI_x @ V[:, idd]) / np.sqrt(m2)
 
 		xi_ = xi[idd, :]
