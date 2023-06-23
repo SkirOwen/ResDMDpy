@@ -16,7 +16,11 @@ from rdp.utils.directories import get_koopmode_dir
 
 from rdp.examples import load_cylinder_data, load_cylinder_dmd, load_cylinder_edmd
 
+from rdp.utils.directories import get_example_dir
+from rdp.data.basis_func import gen_from_file
+
 plt.rcParams['text.usetex'] = True
+
 
 def get_dict(dmd: Literal["linear", "combined", "pre-computed", "non-linear"]):
 	if dmd == "linear":
@@ -49,6 +53,19 @@ def get_dict(dmd: Literal["linear", "combined", "pre-computed", "non-linear"]):
 		G_matrix = (PSI_x.conj().T @ PSI_x) / data_edmd["M2"]
 		A_matrix = (PSI_x.conj().T @ PSI_y) / data_edmd["M2"]
 		L_matrix = (PSI_y.conj().T @ PSI_y) / data_edmd["M2"]
+
+	elif dmd == "generate":
+		# data_raw = load_cylinder_data()
+		filepath = os.path.join(get_example_dir(), "Cylinder_data.mat")
+		N = 200
+		M1 = 500
+		M2 = 1000
+		dmd = 1
+		PSI_x, PSI_y = gen_from_file(filepath, n=N, m1=M1, m2=M2, use_dmd=dmd)
+
+		G_matrix = (PSI_x.conj().T @ PSI_x) / M2
+		A_matrix = (PSI_x.conj().T @ PSI_y) / M2
+		L_matrix = (PSI_y.conj().T @ PSI_y) / M2
 
 	else:   # pre-computed
 		data = load_cylinder_edmd()
