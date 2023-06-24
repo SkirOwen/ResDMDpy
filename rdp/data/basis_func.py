@@ -10,7 +10,7 @@ def gen_from_file(
 		n: int = 200,
 		m1: int = 500,
 		m2: int = 1000,
-		use_dmd: int = 1,  # TODO: change this to a bool maybe
+		linear_dict: bool = False,  # eq to use_dmd = 0
 ) -> tuple[np.ndarray, np.ndarray]:
 	""""""
 	data = loadmat(filepath)
@@ -19,7 +19,7 @@ def gen_from_file(
 	# TODO: this slicing returns the right thing, but I think there is a nicer way
 	# I had to do a +1 for ind2
 
-	if use_dmd == 1:
+	if linear_dict == 1:
 		# Linear dictionary
 		_, s, vh = np.linalg.svd(data["DATA"][:, ind1].T / np.sqrt(m1), full_matrices=False)
 		# TODO: during the svd, at least two columns of vh (2, and 4) have their sign flipped compare to matlab

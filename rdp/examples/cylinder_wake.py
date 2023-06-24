@@ -60,8 +60,8 @@ def get_dict(dmd: Literal["linear", "combined", "pre-computed", "non-linear"]):
 		N = 200
 		M1 = 500
 		M2 = 1000
-		dmd = 1
-		PSI_x, PSI_y = gen_from_file(filepath, n=N, m1=M1, m2=M2, use_dmd=dmd)
+		dmd = True
+		PSI_x, PSI_y = gen_from_file(filepath, n=N, m1=M1, m2=M2, linear_dict=dmd)
 
 		G_matrix = (PSI_x.conj().T @ PSI_x) / M2
 		A_matrix = (PSI_x.conj().T @ PSI_y) / M2
