@@ -1,6 +1,7 @@
 import numpy as np
 import scipy
 
+from rdp import logger
 from rdp import kernel_resdmd
 from rdp.utils.mat_loader import loadmat
 
@@ -42,7 +43,8 @@ def gen_from_file(
 
 
 def main():
-	gen_from_file("./rdp/examples/Cylinder_data.mat", use_dmd=0)
+	logger.setLevel("DEBUG")
+	gen_from_file("./rdp/examples/Cylinder_data.mat", n=8, linear_dict=False)
 
 
 if __name__ == "__main__":
