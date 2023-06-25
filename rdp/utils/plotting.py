@@ -18,7 +18,7 @@ def plot_pseudospectra(D, RES, X, Y, x_pts, y_pts):
 		Y,
 		np.log10(np.real(RES)).reshape(len(y_pts), len(x_pts)),     # RES is already a real no?
 		np.log10(v),
-		# cmap=cm.cm.thermal
+		cmap=cm.cm.amp
 	)
 	fig.colorbar(contourf)
 	# cbh.set_ticks(np.log10([0.005, 0.01, 0.1, 1]))
