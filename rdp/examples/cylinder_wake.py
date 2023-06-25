@@ -22,60 +22,86 @@ from rdp.data.basis_func import gen_from_file
 plt.rcParams['text.usetex'] = True
 
 
-def get_dict(dmd: Literal["linear", "combined", "pre-computed", "non-linear"]):
+def get_dict(
+		dmd: Literal["linear", "combined", "pre-computed", "non-linear", "generate"],
+		n: int = 200,
+		m1: int = 500,
+		m2: int = 1000,
+		linear_dict: bool = True,
+):
+	"""
+	Get the dictionary (or generate) for the koopman mode from the cylinder data.
+
+	Parameters
+	----------
+	dmd : {'linear', 'combined', 'pre-computed', 'generate'}
+	n : int, optional
+		Size of the computed dictionary. The default is 200.
+	m1 : int, optional
+		Number of snapshots to compute the basis. The default is 500.
+	m2 : int, optional
+		Number of snapshots used for ResDMD matrices. The default is 1000.
+	linear_dict : bool, optional
+		If True, compute the linear dictionary. Otherwise (default), compute the non-linear.
+
+	Returns
+	-------
+	G_matrix : ndarray
+	A_matrix : ndarray
+	L_matrix : ndarray
+	n : int
+		Size of the computed dictionary
+	psi_x : ndarray
+	"""
 	if dmd == "linear":
 		data = load_cylinder_dmd()
 		G_matrix = data["G_matrix"]
 		A_matrix = data["A_matrix"]
 		L_matrix = data["L_matrix"]
-		N = data["N"][0, 0]
-		PSI_x = data["PSI_x"]
+		n = data["N"][0, 0]
+		psi_x = data["PSI_x"]
 
 	elif dmd == "combined":
 		data_dmd = load_cylinder_dmd()
-		PSI_x0 = data_dmd["PSI_x"]
-		PSI_y0 = data_dmd["PSI_y"]
+		psi_x0 = data_dmd["PSI_x"]
+		psi_y0 = data_dmd["PSI_y"]
 		data_edmd = load_cylinder_edmd()
-		N = 2 * data_edmd["N"][0, 0]
-		PSI_x = np.hstack([data_edmd["PSI_x"], PSI_x0])
-		PSI_y = np.hstack([data_edmd["PSI_y"], PSI_y0])
+		n = 2 * data_edmd["N"][0, 0]
+		psi_x = np.hstack([data_edmd["PSI_x"], psi_x0])
+		psi_y = np.hstack([data_edmd["PSI_y"], psi_y0])
 
-		G_matrix = (PSI_x.conj().T @ PSI_x) / data_edmd["M2"]
-		A_matrix = (PSI_x.conj().T @ PSI_y) / data_edmd["M2"]
-		L_matrix = (PSI_y.conj().T @ PSI_y) / data_edmd["M2"]
+		G_matrix = (psi_x.conj().T @ psi_x) / data_edmd["M2"]
+		A_matrix = (psi_x.conj().T @ psi_y) / data_edmd["M2"]
+		L_matrix = (psi_y.conj().T @ psi_y) / data_edmd["M2"]
 
 	elif dmd == "non-linear":
 		data_edmd = load_cylinder_edmd()
-		N = data_edmd["N"][0, 0]
-		PSI_x = data_edmd["PSI_x"]
-		PSI_y = data_edmd["PSI_y"]
+		n = data_edmd["N"][0, 0]
+		psi_x = data_edmd["PSI_x"]
+		psi_y = data_edmd["PSI_y"]
 
-		G_matrix = (PSI_x.conj().T @ PSI_x) / data_edmd["M2"]
-		A_matrix = (PSI_x.conj().T @ PSI_y) / data_edmd["M2"]
-		L_matrix = (PSI_y.conj().T @ PSI_y) / data_edmd["M2"]
+		G_matrix = (psi_x.conj().T @ psi_x) / data_edmd["M2"]
+		A_matrix = (psi_x.conj().T @ psi_y) / data_edmd["M2"]
+		L_matrix = (psi_y.conj().T @ psi_y) / data_edmd["M2"]
 
 	elif dmd == "generate":
 		# data_raw = load_cylinder_data()
 		filepath = os.path.join(get_example_dir(), "Cylinder_data.mat")
-		N = 200
-		M1 = 500
-		M2 = 1000
-		dmd = True
-		PSI_x, PSI_y = gen_from_file(filepath, n=N, m1=M1, m2=M2, linear_dict=dmd)
+		psi_x, psi_y = gen_from_file(filepath, n=n, m1=m1, m2=m2, linear_dict=linear_dict)
 
-		G_matrix = (PSI_x.conj().T @ PSI_x) / M2
-		A_matrix = (PSI_x.conj().T @ PSI_y) / M2
-		L_matrix = (PSI_y.conj().T @ PSI_y) / M2
+		G_matrix = (psi_x.conj().T @ psi_x) / m2
+		A_matrix = (psi_x.conj().T @ psi_y) / m2
+		L_matrix = (psi_y.conj().T @ psi_y) / m2
 
 	else:   # pre-computed
 		data = load_cylinder_edmd()
 		G_matrix = data["G_matrix"]
 		A_matrix = data["A_matrix"]
 		L_matrix = data["L_matrix"]
-		N = data["N"][0, 0]
-		PSI_x = data["PSI_x"]
+		n = data["N"][0, 0]
+		psi_x = data["PSI_x"]
 
-	return G_matrix, A_matrix, L_matrix, N, PSI_x
+	return G_matrix, A_matrix, L_matrix, n, psi_x
 
 
 def gen_koop_modes(
