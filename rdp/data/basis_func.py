@@ -11,12 +11,13 @@ def gen_from_file(
 		n: int = 200,
 		m1: int = 500,
 		m2: int = 1000,
+		start_time: int = 6000,     # simulation time from which start looking
 		linear_dict: bool = False,  # eq to use_dmd = 0
 ) -> tuple[np.ndarray, np.ndarray]:
 	""""""
 	data = loadmat(filepath)
-	ind1 = np.arange(0, m1) + 6000    # slicing in matlab include the last item
-	ind2 = np.arange(0, m2) + (m1 + 6000) + 500
+	ind1 = np.arange(0, m1) + start_time    # slicing in matlab include the last item
+	ind2 = np.arange(0, m2) + (m1 + start_time) + 500
 	# this slicing returns the right thing, but I think there is a nicer way!
 	# Since MATLAB index start at 1, but Python start at zero,
 	# these are off by one, but it is expected .
