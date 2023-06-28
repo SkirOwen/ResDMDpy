@@ -241,7 +241,7 @@ def run(powers: list, plot: bool = True, filename: str = "cylinder_xi_v3_p.h5"):
 	res1 = np.zeros(100)
 
 	for j in range(100):
-		# find the indices of eigenvalues close to t1^j    (GPT???)
+		# find the indices of eigenvalues close to t1^j
 		I2 = np.where(np.abs(lam - t1 ** (j + 1)) < 0.001)[0]
 		# TODO: max(0.001, 0) really useful, why is max(lam1) multiplied by 0 ?????
 		# TODO: look at np.nonzero
