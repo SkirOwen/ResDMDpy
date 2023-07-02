@@ -5,7 +5,7 @@
 
 **DISCLAIMER: This an early version and not everything has been ported to python**
 
-This is a `python` translation of https://github.com/MColbrook/Measure-preserving-Extended-Dynamic-Mode-Decomposition.
+This is a `python` translation of https://github.com/MColbrook/Residual-Dynamic-Mode-Decomposition.
 
 
 ## Installation

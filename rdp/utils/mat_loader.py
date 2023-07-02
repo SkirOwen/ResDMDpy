@@ -11,7 +11,7 @@ def loadmat(filepath: str) -> dict:
 		logger.debug(f"Loading {filepath} with scipy.")
 		data = scipy.io.loadmat(filepath)
 	except NotImplementedError:
-		logger.debug("Scipy did not work trying with h5py")
+		logger.debug("scipy did not work trying with h5py")
 		import h5py
 		data = {}
 		f = h5py.File(filepath)

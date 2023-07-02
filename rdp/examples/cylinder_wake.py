@@ -16,49 +16,92 @@ from rdp.utils.directories import get_koopmode_dir
 
 from rdp.examples import load_cylinder_data, load_cylinder_dmd, load_cylinder_edmd
 
+from rdp.utils.directories import get_example_dir
+from rdp.data.basis_func import gen_from_file
+
 plt.rcParams['text.usetex'] = True
 
-def get_dict(dmd: Literal["linear", "combined", "pre-computed", "non-linear"]):
+
+def get_dict(
+		dmd: Literal["linear", "combined", "pre-computed", "non-linear", "generate"],
+		n: int = 200,
+		m1: int = 500,
+		m2: int = 1000,
+		linear_dict: bool = True,
+):
+	"""
+	Get the dictionary (or generate) for the koopman mode from the cylinder data.
+
+	Parameters
+	----------
+	dmd : {'linear', 'combined', 'pre-computed', 'generate'}
+	n : int, optional
+		Size of the computed dictionary. The default is 200.
+	m1 : int, optional
+		Number of snapshots to compute the basis. The default is 500.
+	m2 : int, optional
+		Number of snapshots used for ResDMD matrices. The default is 1000.
+	linear_dict : bool, optional
+		If True, compute the linear dictionary. Otherwise (default), compute the non-linear.
+
+	Returns
+	-------
+	G_matrix : ndarray
+	A_matrix : ndarray
+	L_matrix : ndarray
+	n : int
+		Size of the computed dictionary
+	psi_x : ndarray
+	"""
 	if dmd == "linear":
 		data = load_cylinder_dmd()
 		G_matrix = data["G_matrix"]
 		A_matrix = data["A_matrix"]
 		L_matrix = data["L_matrix"]
-		N = data["N"][0, 0]
-		PSI_x = data["PSI_x"]
+		n = data["N"][0, 0]
+		psi_x = data["PSI_x"]
 
 	elif dmd == "combined":
 		data_dmd = load_cylinder_dmd()
-		PSI_x0 = data_dmd["PSI_x"]
-		PSI_y0 = data_dmd["PSI_y"]
+		psi_x0 = data_dmd["PSI_x"]
+		psi_y0 = data_dmd["PSI_y"]
 		data_edmd = load_cylinder_edmd()
-		N = 2 * data_edmd["N"][0, 0]
-		PSI_x = np.hstack([data_edmd["PSI_x"], PSI_x0])
-		PSI_y = np.hstack([data_edmd["PSI_y"], PSI_y0])
+		n = 2 * data_edmd["N"][0, 0]
+		psi_x = np.hstack([data_edmd["PSI_x"], psi_x0])
+		psi_y = np.hstack([data_edmd["PSI_y"], psi_y0])
 
-		G_matrix = (PSI_x.conj().T @ PSI_x) / data_edmd["M2"]
-		A_matrix = (PSI_x.conj().T @ PSI_y) / data_edmd["M2"]
-		L_matrix = (PSI_y.conj().T @ PSI_y) / data_edmd["M2"]
+		G_matrix = (psi_x.conj().T @ psi_x) / data_edmd["M2"]
+		A_matrix = (psi_x.conj().T @ psi_y) / data_edmd["M2"]
+		L_matrix = (psi_y.conj().T @ psi_y) / data_edmd["M2"]
 
 	elif dmd == "non-linear":
 		data_edmd = load_cylinder_edmd()
-		N = data_edmd["N"][0, 0]
-		PSI_x = data_edmd["PSI_x"]
-		PSI_y = data_edmd["PSI_y"]
+		n = data_edmd["N"][0, 0]
+		psi_x = data_edmd["PSI_x"]
+		psi_y = data_edmd["PSI_y"]
 
-		G_matrix = (PSI_x.conj().T @ PSI_x) / data_edmd["M2"]
-		A_matrix = (PSI_x.conj().T @ PSI_y) / data_edmd["M2"]
-		L_matrix = (PSI_y.conj().T @ PSI_y) / data_edmd["M2"]
+		G_matrix = (psi_x.conj().T @ psi_x) / data_edmd["M2"]
+		A_matrix = (psi_x.conj().T @ psi_y) / data_edmd["M2"]
+		L_matrix = (psi_y.conj().T @ psi_y) / data_edmd["M2"]
+
+	elif dmd == "generate":
+		# data_raw = load_cylinder_data()
+		filepath = os.path.join(get_example_dir(), "Cylinder_data.mat")
+		psi_x, psi_y = gen_from_file(filepath, n=n, m1=m1, m2=m2, linear_dict=linear_dict)
+
+		G_matrix = (psi_x.conj().T @ psi_x) / m2
+		A_matrix = (psi_x.conj().T @ psi_y) / m2
+		L_matrix = (psi_y.conj().T @ psi_y) / m2
 
 	else:   # pre-computed
 		data = load_cylinder_edmd()
 		G_matrix = data["G_matrix"]
 		A_matrix = data["A_matrix"]
 		L_matrix = data["L_matrix"]
-		N = data["N"][0, 0]
-		PSI_x = data["PSI_x"]
+		n = data["N"][0, 0]
+		psi_x = data["PSI_x"]
 
-	return G_matrix, A_matrix, L_matrix, N, PSI_x
+	return G_matrix, A_matrix, L_matrix, n, psi_x
 
 
 def gen_koop_modes(
@@ -107,6 +150,7 @@ def gen_koop_modes(
 		lambda_ = t1 ** power
 		idd = np.argmin(np.abs(D - lambda_))    # TODO: check this, seem good but return Number, and np.where an array
 		# TODO: matlab returns a Number
+		# eigval = D[idd]
 		tt = np.linalg.norm(PSI_x @ V[:, idd]) / np.sqrt(m2)
 
 		xi_ = xi[idd, :]
@@ -147,8 +191,8 @@ def save_mode_png(filename, xi_) -> None:
 	image.save(f"{filename}.png")
 
 
-def run(powers: list, plot: bool = True, filename: str = "cylinder_xi_v3_p.h5"):
-	G_matrix, A_matrix, L_matrix, N, PSI_x = get_dict(dmd="non-linear")
+def run(powers: list, plot: bool = True, filename: str = "cylinder_xi_v3_p.h5", dmd: str = "non-linear"):
+	G_matrix, A_matrix, L_matrix, N, PSI_x = get_dict(dmd=dmd)
 
 	x_pts = np.arange(-1.5, 1.55, 0.05)
 	y_pts = np.arange(-1.5, 1.55, 0.05)
@@ -197,7 +241,7 @@ def run(powers: list, plot: bool = True, filename: str = "cylinder_xi_v3_p.h5"):
 	res1 = np.zeros(100)
 
 	for j in range(100):
-		# find the indices of eigenvalues close to t1^j    (GPT???)
+		# find the indices of eigenvalues close to t1^j
 		I2 = np.where(np.abs(lam - t1 ** (j + 1)) < 0.001)[0]
 		# TODO: max(0.001, 0) really useful, why is max(lam1) multiplied by 0 ?????
 		# TODO: look at np.nonzero
@@ -226,8 +270,9 @@ def run(powers: list, plot: bool = True, filename: str = "cylinder_xi_v3_p.h5"):
 
 
 def main():
+	plt.rcParams['text.usetex'] = True
 	powers = [i for i in range(1, 51)]
-	run(powers, plot=False, filename="cylinder_xi_1_50.h5")
+	run(powers, plot=True, filename="cylinder_xi_1_50.h5", dmd="linear")
 
 
 if __name__ == "__main__":
