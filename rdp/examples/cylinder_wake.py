@@ -191,8 +191,8 @@ def save_mode_png(filename, xi_) -> None:
 	image.save(f"{filename}.png")
 
 
-def run(powers: list, plot: bool = True, filename: str = "cylinder_xi_v3_p.h5"):
-	G_matrix, A_matrix, L_matrix, N, PSI_x = get_dict(dmd="non-linear")
+def run(powers: list, plot: bool = True, filename: str = "cylinder_xi_v3_p.h5", dmd: str = "non-linear"):
+	G_matrix, A_matrix, L_matrix, N, PSI_x = get_dict(dmd=dmd)
 
 	x_pts = np.arange(-1.5, 1.55, 0.05)
 	y_pts = np.arange(-1.5, 1.55, 0.05)
@@ -270,8 +270,9 @@ def run(powers: list, plot: bool = True, filename: str = "cylinder_xi_v3_p.h5"):
 
 
 def main():
+	plt.rcParams['text.usetex'] = True
 	powers = [i for i in range(1, 51)]
-	run(powers, plot=False, filename="cylinder_xi_1_50.h5")
+	run(powers, plot=True, filename="cylinder_xi_1_50.h5", dmd="linear")
 
 
 if __name__ == "__main__":
